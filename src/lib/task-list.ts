@@ -61,8 +61,8 @@ function formatGroupedTaskList(
     lines.push(chalk.italic.dim(`(no section) (${noSection.length})`))
     for (const task of noSection) {
       lines.push(formatTaskRow(task))
+      lines.push('')
     }
-    lines.push('')
   }
 
   for (const section of sections) {
@@ -71,8 +71,8 @@ function formatGroupedTaskList(
       lines.push(`${section.name} (${sectionTasks.length})`)
       for (const task of sectionTasks) {
         lines.push(formatTaskRow(task))
+        lines.push('')
       }
-      lines.push('')
     }
   }
 
@@ -84,12 +84,12 @@ function formatFlatTaskList(tasks: Task[], projects: Map<string, Project>): stri
     return 'No tasks found.'
   }
 
-  const lines = tasks.map((task) => {
+  const blocks = tasks.map((task) => {
     const projectName = projects.get(task.projectId)?.name
     return formatTaskRow(task, projectName)
   })
 
-  return lines.join('\n')
+  return blocks.join('\n\n')
 }
 
 export async function listTasksForProject(

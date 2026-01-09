@@ -67,13 +67,14 @@ export function registerTodayCommand(program: Command): void {
         console.log(chalk.red.bold(`Overdue (${overdue.length})`))
         for (const task of overdue) {
           console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
+          console.log('')
         }
-        console.log('')
       }
 
       console.log(chalk.bold(`Today (${dueToday.length})`))
       for (const task of dueToday) {
         console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
+        console.log('')
       }
       console.log(formatNextCursorFooter(nextCursor))
     })

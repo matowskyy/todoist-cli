@@ -89,20 +89,17 @@ export function registerUpcomingCommand(program: Command): void {
         console.log(chalk.red.bold(`Overdue (${overdue.length})`))
         for (const task of overdue) {
           console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
+          console.log('')
         }
-        console.log('')
       }
 
       const sortedDates = Array.from(byDate.keys()).sort()
-      for (let i = 0; i < sortedDates.length; i++) {
-        const date = sortedDates[i]
+      for (const date of sortedDates) {
         const dateTasks = byDate.get(date)!
         const header = formatDateHeader(date, today)
         console.log(chalk.bold(`${header} (${dateTasks.length})`))
         for (const task of dateTasks) {
           console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
-        }
-        if (i < sortedDates.length - 1) {
           console.log('')
         }
       }

@@ -28,17 +28,13 @@ export function formatDue(due: Task['due'] | undefined): string {
 }
 
 export function formatTaskRow(task: Task, projectName?: string): string {
-  const id = chalk.dim(task.id)
-  const priority = formatPriority(task.priority)
-  const content = task.content
+  const line1 = '  ' + task.content
+  const metaParts = [chalk.dim(`id:${task.id}`), formatPriority(task.priority)]
   const due = formatDue(task.due)
-  const project = projectName ? chalk.cyan(projectName) : ''
-
-  const parts = [id, priority, content]
-  if (due) parts.push(chalk.green(due))
-  if (project) parts.push(project)
-
-  return parts.join('  ')
+  if (due) metaParts.push(chalk.green(due))
+  if (projectName) metaParts.push(chalk.cyan(projectName))
+  const line2 = '  ' + metaParts.join('  ')
+  return `${line1}\n${line2}`
 }
 
 export function formatTaskView(task: Task, project?: Project, full = false): string {

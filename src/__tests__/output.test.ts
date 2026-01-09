@@ -66,23 +66,34 @@ describe('formatDue', () => {
 })
 
 describe('formatTaskRow', () => {
-  it('includes task id and content', () => {
+  it('returns two-line format with indented content on first line', () => {
     const task = fixtures.tasks.basic
     const result = formatTaskRow(task)
-    expect(result).toContain(task.id)
-    expect(result).toContain(task.content)
+    const lines = result.split('\n')
+    expect(lines).toHaveLength(2)
+    expect(lines[0]).toBe('  ' + task.content)
   })
 
-  it('includes due date when present', () => {
+  it('includes metadata on indented second line', () => {
+    const task = fixtures.tasks.basic
+    const result = formatTaskRow(task)
+    const lines = result.split('\n')
+    expect(lines[1]).toMatch(/^\s{2}/)
+    expect(lines[1]).toContain(`id:${task.id}`)
+  })
+
+  it('includes due date in metadata line when present', () => {
     const task = fixtures.tasks.withDue
     const result = formatTaskRow(task)
-    expect(result).toContain('today')
+    const lines = result.split('\n')
+    expect(lines[1]).toContain('today')
   })
 
-  it('includes project name when provided', () => {
+  it('includes project name in metadata line when provided', () => {
     const task = fixtures.tasks.basic
     const result = formatTaskRow(task, 'Work')
-    expect(result).toContain('Work')
+    const lines = result.split('\n')
+    expect(lines[1]).toContain('Work')
   })
 
   it('omits project name when not provided', () => {
