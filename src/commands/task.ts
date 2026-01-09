@@ -1,9 +1,8 @@
 import { Command } from 'commander'
-import { getApi, type Project } from '../lib/api.js'
+import { getApi } from '../lib/api.js'
 import { formatTaskView, formatError } from '../lib/output.js'
-import { isIdRef, extractId, requireIdRef } from '../lib/refs.js'
+import { requireIdRef, resolveProjectId, resolveTaskRef } from '../lib/refs.js'
 import { listTasksForProject, parsePriority, type TaskListOptions } from '../lib/task-list.js'
-import type { Task } from '@doist/todoist-api-typescript'
 
 interface ListOptions extends TaskListOptions {
   project?: string
@@ -11,34 +10,6 @@ interface ListOptions extends TaskListOptions {
 
 interface ViewOptions {
   full?: boolean
-}
-
-async function resolveProjectId(api: Awaited<ReturnType<typeof getApi>>, nameOrId: string): Promise<string | null> {
-  if (isIdRef(nameOrId)) {
-    return extractId(nameOrId)
-  }
-
-  const { results: projects } = await api.getProjects()
-  const lower = nameOrId.toLowerCase()
-
-  const exact = projects.find((p) => p.name.toLowerCase() === lower)
-  if (exact) return exact.id
-
-  const partial = projects.filter((p) => p.name.toLowerCase().includes(lower))
-  if (partial.length === 1) return partial[0].id
-  if (partial.length > 1) {
-    throw new Error(
-      formatError(
-        'AMBIGUOUS_PROJECT',
-        `Multiple projects match "${nameOrId}":`,
-        partial.slice(0, 5).map((p) => `"${p.name}" (id:${p.id})`)
-      )
-    )
-  }
-
-  throw new Error(
-    formatError('PROJECT_NOT_FOUND', `Project "${nameOrId}" not found.`)
-  )
 }
 
 async function listTasks(options: ListOptions): Promise<void> {
@@ -50,34 +21,6 @@ async function listTasks(options: ListOptions): Promise<void> {
   }
 
   await listTasksForProject(projectId, options)
-}
-
-async function resolveTaskRef(api: Awaited<ReturnType<typeof getApi>>, ref: string): Promise<Task> {
-  if (isIdRef(ref)) {
-    return api.getTask(extractId(ref))
-  }
-
-  const { results: tasks } = await api.getTasks()
-  const lower = ref.toLowerCase()
-
-  const exact = tasks.find((t) => t.content.toLowerCase() === lower)
-  if (exact) return exact
-
-  const partial = tasks.filter((t) => t.content.toLowerCase().includes(lower))
-  if (partial.length === 1) return partial[0]
-  if (partial.length > 1) {
-    throw new Error(
-      formatError(
-        'AMBIGUOUS_TASK',
-        `Multiple tasks match "${ref}":`,
-        partial.slice(0, 5).map((t) => `"${t.content}" (id:${t.id})`)
-      )
-    )
-  }
-
-  throw new Error(
-    formatError('TASK_NOT_FOUND', `Task "${ref}" not found.`)
-  )
 }
 
 async function viewTask(ref: string, options: ViewOptions): Promise<void> {

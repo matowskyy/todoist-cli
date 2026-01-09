@@ -1,4 +1,6 @@
+import { TodoistApi } from '@doist/todoist-api-typescript'
 import { formatError } from './output.js'
+import type { Task, Project } from './api.js'
 
 export function isIdRef(ref: string): boolean {
   return ref.startsWith('id:')
@@ -19,4 +21,63 @@ export function requireIdRef(ref: string, entityName: string): string {
     )
   }
   return extractId(ref)
+}
+
+async function resolveRef<T extends { id: string }>(
+  ref: string,
+  fetchById: (id: string) => Promise<T>,
+  fetchAll: () => Promise<{ results: T[] }>,
+  getName: (item: T) => string,
+  entityType: string
+): Promise<T> {
+  if (isIdRef(ref)) {
+    return fetchById(extractId(ref))
+  }
+
+  const { results } = await fetchAll()
+  const lower = ref.toLowerCase()
+
+  const exact = results.find((item) => getName(item).toLowerCase() === lower)
+  if (exact) return exact
+
+  const partial = results.filter((item) => getName(item).toLowerCase().includes(lower))
+  if (partial.length === 1) return partial[0]
+  if (partial.length > 1) {
+    throw new Error(
+      formatError(
+        `AMBIGUOUS_${entityType.toUpperCase()}`,
+        `Multiple ${entityType}s match "${ref}":`,
+        partial.slice(0, 5).map((item) => `"${getName(item)}" (id:${item.id})`)
+      )
+    )
+  }
+
+  throw new Error(
+    formatError(`${entityType.toUpperCase()}_NOT_FOUND`, `${entityType} "${ref}" not found.`)
+  )
+}
+
+export async function resolveTaskRef(api: TodoistApi, ref: string): Promise<Task> {
+  return resolveRef(
+    ref,
+    (id) => api.getTask(id),
+    () => api.getTasks(),
+    (t) => t.content,
+    'task'
+  )
+}
+
+export async function resolveProjectRef(api: TodoistApi, ref: string): Promise<Project> {
+  return resolveRef(
+    ref,
+    (id) => api.getProject(id),
+    () => api.getProjects(),
+    (p) => p.name,
+    'project'
+  )
+}
+
+export async function resolveProjectId(api: TodoistApi, ref: string): Promise<string> {
+  const project = await resolveProjectRef(api, ref)
+  return project.id
 }

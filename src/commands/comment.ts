@@ -1,36 +1,9 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
 import { formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
-import { paginate, DEFAULT_LIMIT } from '../lib/pagination.js'
-import { isIdRef, extractId, requireIdRef } from '../lib/refs.js'
-import type { Task } from '@doist/todoist-api-typescript'
+import { paginate, LIMITS } from '../lib/pagination.js'
+import { requireIdRef, resolveTaskRef } from '../lib/refs.js'
 import chalk from 'chalk'
-
-async function resolveTaskRef(api: Awaited<ReturnType<typeof getApi>>, ref: string): Promise<Task> {
-  if (isIdRef(ref)) {
-    return api.getTask(extractId(ref))
-  }
-
-  const { results: tasks } = await api.getTasks()
-  const lower = ref.toLowerCase()
-
-  const exact = tasks.find((t) => t.content.toLowerCase() === lower)
-  if (exact) return exact
-
-  const partial = tasks.filter((t) => t.content.toLowerCase().includes(lower))
-  if (partial.length === 1) return partial[0]
-  if (partial.length > 1) {
-    throw new Error(
-      formatError(
-        'AMBIGUOUS_TASK',
-        `Multiple tasks match "${ref}":`,
-        partial.slice(0, 5).map((t) => `"${t.content}" (id:${t.id})`)
-      )
-    )
-  }
-
-  throw new Error(formatError('TASK_NOT_FOUND', `Task "${ref}" not found.`))
-}
 
 interface ListOptions {
   limit?: string
@@ -48,7 +21,7 @@ async function listComments(taskRef: string, options: ListOptions): Promise<void
     ? Number.MAX_SAFE_INTEGER
     : options.limit
       ? parseInt(options.limit, 10)
-      : 10
+      : LIMITS.comments
 
   const { results: comments, nextCursor } = await paginate(
     (cursor, limit) => api.getComments({ taskId: task.id, cursor: cursor ?? undefined, limit }),

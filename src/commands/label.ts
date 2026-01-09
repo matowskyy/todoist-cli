@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
 import { formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
-import { paginate, DEFAULT_LIMIT } from '../lib/pagination.js'
+import { paginate, LIMITS } from '../lib/pagination.js'
 import { isIdRef, extractId } from '../lib/refs.js'
 import chalk from 'chalk'
 
@@ -20,7 +20,7 @@ async function listLabels(options: ListOptions): Promise<void> {
     ? Number.MAX_SAFE_INTEGER
     : options.limit
       ? parseInt(options.limit, 10)
-      : DEFAULT_LIMIT
+      : LIMITS.labels
 
   const { results: labels, nextCursor } = await paginate(
     (cursor, limit) => api.getLabels({ cursor: cursor ?? undefined, limit }),

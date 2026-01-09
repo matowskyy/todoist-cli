@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { getApi, type Project } from '../lib/api.js'
 import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter } from '../lib/output.js'
-import { paginate, DEFAULT_LIMIT } from '../lib/pagination.js'
+import { paginate, LIMITS } from '../lib/pagination.js'
 import chalk from 'chalk'
 
 interface TodayOptions {
@@ -30,7 +30,7 @@ export function registerTodayCommand(program: Command): void {
         ? Number.MAX_SAFE_INTEGER
         : options.limit
           ? parseInt(options.limit, 10)
-          : DEFAULT_LIMIT
+          : LIMITS.tasks
 
       const { results: tasks, nextCursor } = await paginate(
         (cursor, limit) => api.getTasks({ cursor: cursor ?? undefined, limit }),

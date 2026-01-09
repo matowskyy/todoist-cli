@@ -39,4 +39,10 @@ export async function paginate<T>(
   }
 }
 
-export const DEFAULT_LIMIT = 300
+export const LIMITS = {
+  tasks: 300,
+  projects: 50,
+  sections: 300,
+  labels: 300,
+  comments: 10,
+} as const

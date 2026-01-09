@@ -1,6 +1,6 @@
 import { getApi, type Project, type Section } from './api.js'
 import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from './output.js'
-import { paginate, DEFAULT_LIMIT } from './pagination.js'
+import { paginate, LIMITS } from './pagination.js'
 import type { Task } from '@doist/todoist-api-typescript'
 import chalk from 'chalk'
 
@@ -100,7 +100,7 @@ export async function listTasksForProject(
     ? Number.MAX_SAFE_INTEGER
     : options.limit
       ? parseInt(options.limit, 10)
-      : DEFAULT_LIMIT
+      : LIMITS.tasks
 
   const { results: tasks, nextCursor } = await paginate(
     (cursor, limit) =>
