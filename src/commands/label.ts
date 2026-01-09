@@ -1,0 +1,99 @@
+import { Command } from 'commander'
+import { getApi } from '../lib/api.js'
+import { formatJson, formatError } from '../lib/output.js'
+import chalk from 'chalk'
+
+interface ListOptions {
+  json?: boolean
+}
+
+async function listLabels(options: ListOptions): Promise<void> {
+  const api = await getApi()
+  const { results: labels } = await api.getLabels()
+
+  if (options.json) {
+    console.log(formatJson(labels))
+    return
+  }
+
+  if (labels.length === 0) {
+    console.log('No labels found.')
+    return
+  }
+
+  for (const label of labels) {
+    const id = chalk.dim(label.id)
+    const name = label.isFavorite ? chalk.yellow(`@${label.name}`) : `@${label.name}`
+    console.log(`${id}  ${name}`)
+  }
+}
+
+interface CreateOptions {
+  name: string
+  color?: string
+  favorite?: boolean
+}
+
+async function createLabel(options: CreateOptions): Promise<void> {
+  const api = await getApi()
+
+  const label = await api.addLabel({
+    name: options.name,
+    color: options.color,
+    isFavorite: options.favorite,
+  })
+
+  console.log(`Created: @${label.name}`)
+  console.log(chalk.dim(`ID: ${label.id}`))
+}
+
+async function deleteLabel(nameOrId: string, options: { yes?: boolean }): Promise<void> {
+  if (!options.yes) {
+    throw new Error(
+      formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.')
+    )
+  }
+
+  const api = await getApi()
+  const { results: labels } = await api.getLabels()
+
+  let labelId: string | undefined
+
+  if (nameOrId.startsWith('id:')) {
+    labelId = nameOrId.slice(3)
+  } else {
+    const name = nameOrId.startsWith('@') ? nameOrId.slice(1) : nameOrId
+    const label = labels.find((l) => l.name.toLowerCase() === name.toLowerCase())
+    if (!label) {
+      throw new Error(formatError('LABEL_NOT_FOUND', `Label "${nameOrId}" not found.`))
+    }
+    labelId = label.id
+  }
+
+  await api.deleteLabel(labelId)
+  console.log(`Deleted: @${nameOrId}`)
+}
+
+export function registerLabelCommand(program: Command): void {
+  const label = program.command('label').description('Manage labels')
+
+  label
+    .command('list')
+    .description('List all labels')
+    .option('--json', 'Output as JSON')
+    .action(listLabels)
+
+  label
+    .command('create')
+    .description('Create a label')
+    .requiredOption('--name <name>', 'Label name')
+    .option('--color <color>', 'Label color')
+    .option('--favorite', 'Mark as favorite')
+    .action(createLabel)
+
+  label
+    .command('delete <name>')
+    .description('Delete a label')
+    .option('--yes', 'Confirm deletion')
+    .action(deleteLabel)
+}

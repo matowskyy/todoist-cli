@@ -3,6 +3,7 @@
 import { program } from 'commander'
 import { registerTaskCommand } from './commands/task.js'
 import { registerProjectCommand } from './commands/project.js'
+import { registerLabelCommand } from './commands/label.js'
 import { getApi } from './lib/api.js'
 import { formatDue } from './lib/output.js'
 import chalk from 'chalk'
@@ -25,5 +26,6 @@ program
 
 registerTaskCommand(program)
 registerProjectCommand(program)
+registerLabelCommand(program)
 
 program.parse()
