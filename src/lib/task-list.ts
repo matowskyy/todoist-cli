@@ -6,6 +6,42 @@ import { CollaboratorCache, formatAssignee } from './collaborators.js'
 import type { Task, TodoistApi } from '@doist/todoist-api-typescript'
 import chalk from 'chalk'
 
+export async function filterByWorkspaceOrPersonal(
+  api: TodoistApi,
+  tasks: Task[],
+  workspace: string | undefined,
+  personal: boolean | undefined
+): Promise<{ tasks: Task[], projects: Map<string, Project> }> {
+  if (workspace && personal) {
+    throw new Error(
+      formatError('CONFLICTING_FILTERS', '--workspace and --personal are mutually exclusive.')
+    )
+  }
+
+  const { results: allProjects } = await api.getProjects()
+  const projects = new Map(allProjects.map((p) => [p.id, p]))
+
+  if (!workspace && !personal) {
+    return { tasks, projects }
+  }
+
+  let filtered = tasks
+  if (workspace) {
+    const ws = await resolveWorkspaceRef(workspace)
+    filtered = tasks.filter((t) => {
+      const project = projects.get(t.projectId)
+      return project && isWorkspaceProject(project) && project.workspaceId === ws.id
+    })
+  } else if (personal) {
+    filtered = tasks.filter((t) => {
+      const project = projects.get(t.projectId)
+      return project && !isWorkspaceProject(project)
+    })
+  }
+
+  return { tasks: filtered, projects }
+}
+
 export interface TaskListOptions {
   priority?: string
   due?: string
@@ -176,29 +212,10 @@ export async function listTasksForProject(
     filtered = filtered.filter((t) => t.responsibleUid === assigneeId)
   }
 
-  if (options.workspace && options.personal) {
-    throw new Error(
-      formatError('CONFLICTING_FILTERS', '--workspace and --personal are mutually exclusive.')
-    )
-  }
-
-  if (options.workspace || options.personal) {
-    const { results: allProjects } = await api.getProjects()
-    const projectsMap = new Map(allProjects.map((p) => [p.id, p]))
-
-    if (options.workspace) {
-      const workspace = await resolveWorkspaceRef(options.workspace)
-      filtered = filtered.filter((t) => {
-        const project = projectsMap.get(t.projectId)
-        return project && isWorkspaceProject(project) && project.workspaceId === workspace.id
-      })
-    } else if (options.personal) {
-      filtered = filtered.filter((t) => {
-        const project = projectsMap.get(t.projectId)
-        return project && !isWorkspaceProject(project)
-      })
-    }
-  }
+  const filterResult = await filterByWorkspaceOrPersonal(
+    api, filtered, options.workspace, options.personal
+  )
+  filtered = filterResult.tasks
 
   if (options.json) {
     console.log(formatPaginatedJson({ results: filtered, nextCursor }, 'task', options.full))
@@ -210,21 +227,17 @@ export async function listTasksForProject(
     return
   }
 
+  const { projects } = filterResult
+  const collaboratorCache = new CollaboratorCache()
+  await collaboratorCache.preload(api, filtered, projects)
+
   if (projectId) {
-    const [projectRes, sectionsRes, { results: allProjects }] = await Promise.all([
+    const [projectRes, sectionsRes] = await Promise.all([
       api.getProject(projectId),
       api.getSections({ projectId }),
-      api.getProjects(),
     ])
-    const projects = new Map(allProjects.map((p) => [p.id, p]))
-    const collaboratorCache = new CollaboratorCache()
-    await collaboratorCache.preload(api, filtered, projects)
     console.log(formatGroupedTaskList(filtered, projectRes, sectionsRes.results, projects, collaboratorCache))
   } else {
-    const { results: allProjects } = await api.getProjects()
-    const projects = new Map(allProjects.map((p) => [p.id, p]))
-    const collaboratorCache = new CollaboratorCache()
-    await collaboratorCache.preload(api, filtered, projects)
     console.log(formatFlatTaskList(filtered, projects, collaboratorCache))
   }
   console.log(formatNextCursorFooter(nextCursor))

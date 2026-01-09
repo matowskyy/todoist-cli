@@ -8,6 +8,7 @@ import {
   type WorkspaceFolder,
 } from '../lib/api.js'
 import { resolveWorkspaceRef } from '../lib/refs.js'
+import { formatUserShortName } from '../lib/collaborators.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 
 interface ListOptions {
@@ -290,16 +291,6 @@ async function listWorkspaceUsers(ref: string, options: UsersOptions): Promise<v
   if (hasMore) {
     console.log(chalk.dim(`\n... more items exist. Use --all to fetch everything.`))
   }
-}
-
-function formatUserShortName(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/)
-  if (parts.length === 1) {
-    return parts[0]
-  }
-  const firstName = parts[0]
-  const lastInitial = parts[parts.length - 1][0]
-  return `${firstName} ${lastInitial}.`
 }
 
 export function registerWorkspaceCommand(program: Command): void {

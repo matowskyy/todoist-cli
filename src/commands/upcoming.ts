@@ -1,10 +1,10 @@
 import { Command } from 'commander'
-import { getApi, getCurrentUserId, isWorkspaceProject, type Project, type Task } from '../lib/api.js'
-import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
+import { getApi, getCurrentUserId, type Task } from '../lib/api.js'
+import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter } from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { getLocalDate, formatDateHeader } from '../lib/dates.js'
 import { CollaboratorCache, formatAssignee } from '../lib/collaborators.js'
-import { resolveWorkspaceRef } from '../lib/refs.js'
+import { filterByWorkspaceOrPersonal } from '../lib/task-list.js'
 import chalk from 'chalk'
 
 interface UpcomingOptions {
@@ -64,29 +64,10 @@ export function registerUpcomingCommand(program: Command): void {
         )
       }
 
-      if (options.workspace && options.personal) {
-        throw new Error(
-          formatError('CONFLICTING_FILTERS', '--workspace and --personal are mutually exclusive.')
-        )
-      }
-
-      if (options.workspace || options.personal) {
-        const { results: allProjects } = await api.getProjects()
-        const projectsMap = new Map(allProjects.map((p) => [p.id, p]))
-
-        if (options.workspace) {
-          const workspace = await resolveWorkspaceRef(options.workspace)
-          filteredTasks = filteredTasks.filter((t) => {
-            const project = projectsMap.get(t.projectId)
-            return project && isWorkspaceProject(project) && project.workspaceId === workspace.id
-          })
-        } else if (options.personal) {
-          filteredTasks = filteredTasks.filter((t) => {
-            const project = projectsMap.get(t.projectId)
-            return project && !isWorkspaceProject(project)
-          })
-        }
-      }
+      const filterResult = await filterByWorkspaceOrPersonal(
+        api, filteredTasks, options.workspace, options.personal
+      )
+      filteredTasks = filterResult.tasks
 
       const relevantTasks = filteredTasks.filter(
         (t) => t.due && t.due.date < endDate
@@ -102,9 +83,7 @@ export function registerUpcomingCommand(program: Command): void {
         return
       }
 
-      const { results: allProjects } = await api.getProjects()
-      const projects = new Map<string, Project>(allProjects.map((p) => [p.id, p]))
-
+      const { projects } = filterResult
       const collaboratorCache = new CollaboratorCache()
       await collaboratorCache.preload(api, relevantTasks, projects)
 

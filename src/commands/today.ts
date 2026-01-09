@@ -1,10 +1,10 @@
 import { Command } from 'commander'
-import { getApi, getCurrentUserId, isWorkspaceProject, type Project } from '../lib/api.js'
-import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
+import { getApi, getCurrentUserId } from '../lib/api.js'
+import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter } from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { getLocalDate } from '../lib/dates.js'
 import { CollaboratorCache, formatAssignee } from '../lib/collaborators.js'
-import { resolveWorkspaceRef } from '../lib/refs.js'
+import { filterByWorkspaceOrPersonal } from '../lib/task-list.js'
 import chalk from 'chalk'
 
 interface TodayOptions {
@@ -56,29 +56,10 @@ export function registerTodayCommand(program: Command): void {
         )
       }
 
-      if (options.workspace && options.personal) {
-        throw new Error(
-          formatError('CONFLICTING_FILTERS', '--workspace and --personal are mutually exclusive.')
-        )
-      }
-
-      if (options.workspace || options.personal) {
-        const { results: allProjects } = await api.getProjects()
-        const projectsMap = new Map(allProjects.map((p) => [p.id, p]))
-
-        if (options.workspace) {
-          const workspace = await resolveWorkspaceRef(options.workspace)
-          filteredTasks = filteredTasks.filter((t) => {
-            const project = projectsMap.get(t.projectId)
-            return project && isWorkspaceProject(project) && project.workspaceId === workspace.id
-          })
-        } else if (options.personal) {
-          filteredTasks = filteredTasks.filter((t) => {
-            const project = projectsMap.get(t.projectId)
-            return project && !isWorkspaceProject(project)
-          })
-        }
-      }
+      const filterResult = await filterByWorkspaceOrPersonal(
+        api, filteredTasks, options.workspace, options.personal
+      )
+      filteredTasks = filterResult.tasks
 
       const overdue = filteredTasks.filter((t) => t.due && t.due.date < today)
       const dueToday = filteredTasks.filter((t) => t.due?.date === today)
@@ -94,11 +75,8 @@ export function registerTodayCommand(program: Command): void {
         return
       }
 
-      const { results: allProjects } = await api.getProjects()
-      const projects = new Map<string, Project>(allProjects.map((p) => [p.id, p]))
-
       const collaboratorCache = new CollaboratorCache()
-      await collaboratorCache.preload(api, allTodayTasks, projects)
+      await collaboratorCache.preload(api, allTodayTasks, filterResult.projects)
 
       if (overdue.length === 0 && dueToday.length === 0) {
         console.log('No tasks due today.')
@@ -106,6 +84,7 @@ export function registerTodayCommand(program: Command): void {
         return
       }
 
+      const { projects } = filterResult
       if (overdue.length > 0) {
         console.log(chalk.red.bold(`Overdue (${overdue.length})`))
         for (const task of overdue) {
