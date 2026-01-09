@@ -24,24 +24,17 @@ export function registerTodayCommand(program: Command): void {
         return
       }
 
-      if (overdue.length === 0) {
-        for (const task of dueToday) {
+      if (overdue.length > 0) {
+        console.log(chalk.red.bold(`Overdue (${overdue.length})`))
+        for (const task of overdue) {
           console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
         }
-        return
-      }
-
-      console.log(chalk.red.bold('Overdue'))
-      for (const task of overdue) {
-        console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
-      }
-
-      if (dueToday.length > 0) {
         console.log('')
-        console.log(chalk.bold('Today'))
-        for (const task of dueToday) {
-          console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
-        }
+      }
+
+      console.log(chalk.bold(`Today (${dueToday.length})`))
+      for (const task of dueToday) {
+        console.log(formatTaskRow(task, projects.get(task.projectId)?.name))
       }
     })
 }
