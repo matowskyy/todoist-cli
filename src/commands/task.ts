@@ -7,6 +7,7 @@ import {
   formatNdjson,
   formatError,
 } from '../lib/output.js'
+import { isIdRef, extractId, requireIdRef } from '../lib/refs.js'
 import type { Task } from '@doist/todoist-api-typescript'
 
 interface ListOptions {
@@ -24,8 +25,8 @@ interface ViewOptions {
 }
 
 async function resolveProjectId(api: Awaited<ReturnType<typeof getApi>>, nameOrId: string): Promise<string | null> {
-  if (nameOrId.startsWith('id:')) {
-    return nameOrId.slice(3)
+  if (isIdRef(nameOrId)) {
+    return extractId(nameOrId)
   }
 
   const { results: projects } = await api.getProjects()
@@ -121,9 +122,8 @@ async function listTasks(options: ListOptions): Promise<void> {
 }
 
 async function resolveTaskRef(api: Awaited<ReturnType<typeof getApi>>, ref: string): Promise<Task> {
-  if (ref.startsWith('id:')) {
-    const id = ref.slice(3)
-    return api.getTask(id)
+  if (isIdRef(ref)) {
+    return api.getTask(extractId(ref))
   }
 
   const { results: tasks } = await api.getTasks()
@@ -217,7 +217,7 @@ async function addTask(options: AddOptions): Promise<void> {
   }
 
   if (options.section) {
-    args.sectionId = options.section.startsWith('id:') ? options.section.slice(3) : options.section
+    args.sectionId = requireIdRef(options.section, 'section')
   }
 
   if (options.labels) {
@@ -225,7 +225,7 @@ async function addTask(options: AddOptions): Promise<void> {
   }
 
   if (options.parent) {
-    args.parentId = options.parent.startsWith('id:') ? options.parent.slice(3) : options.parent
+    args.parentId = requireIdRef(options.parent, 'parent task')
   }
 
   if (options.description) {

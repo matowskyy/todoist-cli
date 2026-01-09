@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
 import { formatJson, formatError } from '../lib/output.js'
+import { isIdRef, extractId } from '../lib/refs.js'
 import chalk from 'chalk'
 
 interface ListOptions {
@@ -24,9 +25,8 @@ async function listProjects(options: ListOptions): Promise<void> {
 }
 
 async function resolveProjectRef(api: Awaited<ReturnType<typeof getApi>>, ref: string) {
-  if (ref.startsWith('id:')) {
-    const id = ref.slice(3)
-    return api.getProject(id)
+  if (isIdRef(ref)) {
+    return api.getProject(extractId(ref))
   }
 
   const { results: projects } = await api.getProjects()

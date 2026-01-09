@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
 import { formatJson, formatError } from '../lib/output.js'
+import { isIdRef, extractId } from '../lib/refs.js'
 import chalk from 'chalk'
 
 interface ListOptions {
@@ -59,8 +60,8 @@ async function deleteLabel(nameOrId: string, options: { yes?: boolean }): Promis
 
   let labelId: string | undefined
 
-  if (nameOrId.startsWith('id:')) {
-    labelId = nameOrId.slice(3)
+  if (isIdRef(nameOrId)) {
+    labelId = extractId(nameOrId)
   } else {
     const name = nameOrId.startsWith('@') ? nameOrId.slice(1) : nameOrId
     const label = labels.find((l) => l.name.toLowerCase() === name.toLowerCase())

@@ -1,11 +1,12 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
 import { formatJson, formatError } from '../lib/output.js'
+import { isIdRef, extractId, requireIdRef } from '../lib/refs.js'
 import chalk from 'chalk'
 
 async function resolveProjectId(api: Awaited<ReturnType<typeof getApi>>, nameOrId: string): Promise<string> {
-  if (nameOrId.startsWith('id:')) {
-    return nameOrId.slice(3)
+  if (isIdRef(nameOrId)) {
+    return extractId(nameOrId)
   }
 
   const { results: projects } = await api.getProjects()
@@ -78,7 +79,7 @@ async function deleteSection(sectionId: string, options: { yes?: boolean }): Pro
   }
 
   const api = await getApi()
-  const id = sectionId.startsWith('id:') ? sectionId.slice(3) : sectionId
+  const id = requireIdRef(sectionId, 'section')
   await api.deleteSection(id)
   console.log(`Deleted section ${id}`)
 }

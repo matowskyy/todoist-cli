@@ -1,13 +1,13 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
 import { formatJson, formatError } from '../lib/output.js'
+import { isIdRef, extractId, requireIdRef } from '../lib/refs.js'
 import type { Task } from '@doist/todoist-api-typescript'
 import chalk from 'chalk'
 
 async function resolveTaskRef(api: Awaited<ReturnType<typeof getApi>>, ref: string): Promise<Task> {
-  if (ref.startsWith('id:')) {
-    const id = ref.slice(3)
-    return api.getTask(id)
+  if (isIdRef(ref)) {
+    return api.getTask(extractId(ref))
   }
 
   const { results: tasks } = await api.getTasks()
@@ -82,7 +82,7 @@ async function deleteComment(commentId: string, options: { yes?: boolean }): Pro
   }
 
   const api = await getApi()
-  const id = commentId.startsWith('id:') ? commentId.slice(3) : commentId
+  const id = requireIdRef(commentId, 'comment')
   await api.deleteComment(id)
   console.log(`Deleted comment ${id}`)
 }
