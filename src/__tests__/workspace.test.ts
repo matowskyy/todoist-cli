@@ -21,7 +21,9 @@ const mockFetchWorkspaceFolders = vi.mocked(fetchWorkspaceFolders)
 function createMockApi() {
   return {
     getProjects: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
-    getWorkspaceUsers: vi.fn().mockResolvedValue({ workspaceUsers: [], hasMore: false }),
+    getWorkspaceUsers: vi
+      .fn()
+      .mockResolvedValue({ workspaceUsers: [], hasMore: false }),
   }
 }
 
@@ -77,15 +79,21 @@ describe('workspace list', () => {
     await program.parseAsync(['node', 'td', 'workspace', 'list'])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Doist'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Playground'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Playground')
+    )
   })
 
   it('shows member and project counts', async () => {
     const program = createProgram()
     await program.parseAsync(['node', 'td', 'workspace', 'list'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('143 members'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('497 projects'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('143 members')
+    )
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('497 projects')
+    )
   })
 
   it('shows role indicators', async () => {
@@ -179,7 +187,9 @@ describe('workspace view', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Plan:'))
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('BUSINESS'))
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Members:'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Projects:'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Projects:')
+    )
   })
 
   it('shows domain when available', async () => {
@@ -187,7 +197,9 @@ describe('workspace view', () => {
     await program.parseAsync(['node', 'td', 'workspace', 'view', 'Doist'])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Domain:'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('doist.com'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('doist.com')
+    )
   })
 
   it('throws for non-existent workspace', async () => {
@@ -232,9 +244,27 @@ describe('workspace projects', () => {
   it('lists projects grouped by folder', async () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Backend', workspaceId: 'ws-1', folderId: 'folder-1', status: 'IN_PROGRESS' },
-        { id: 'proj-2', name: 'Campaign', workspaceId: 'ws-1', folderId: 'folder-2', status: 'COMPLETED' },
-        { id: 'proj-3', name: 'General', workspaceId: 'ws-1', folderId: null, status: 'IN_PROGRESS' },
+        {
+          id: 'proj-1',
+          name: 'Backend',
+          workspaceId: 'ws-1',
+          folderId: 'folder-1',
+          status: 'IN_PROGRESS',
+        },
+        {
+          id: 'proj-2',
+          name: 'Campaign',
+          workspaceId: 'ws-1',
+          folderId: 'folder-2',
+          status: 'COMPLETED',
+        },
+        {
+          id: 'proj-3',
+          name: 'General',
+          workspaceId: 'ws-1',
+          folderId: null,
+          status: 'IN_PROGRESS',
+        },
       ],
       nextCursor: null,
     })
@@ -242,8 +272,12 @@ describe('workspace projects', () => {
     const program = createProgram()
     await program.parseAsync(['node', 'td', 'workspace', 'projects', 'Doist'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Engineering/'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Marketing/'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Engineering/')
+    )
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Marketing/')
+    )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Backend'))
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Campaign'))
   })
@@ -251,7 +285,13 @@ describe('workspace projects', () => {
   it('shows projects without status indicator', async () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Backend', workspaceId: 'ws-1', folderId: null, status: 'IN_PROGRESS' },
+        {
+          id: 'proj-1',
+          name: 'Backend',
+          workspaceId: 'ws-1',
+          folderId: null,
+          status: 'IN_PROGRESS',
+        },
       ],
       nextCursor: null,
     })
@@ -265,13 +305,26 @@ describe('workspace projects', () => {
   it('outputs JSON with --json flag', async () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Backend', workspaceId: 'ws-1', folderId: 'folder-1', status: 'IN_PROGRESS' },
+        {
+          id: 'proj-1',
+          name: 'Backend',
+          workspaceId: 'ws-1',
+          folderId: 'folder-1',
+          status: 'IN_PROGRESS',
+        },
       ],
       nextCursor: null,
     })
 
     const program = createProgram()
-    await program.parseAsync(['node', 'td', 'workspace', 'projects', 'Doist', '--json'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'workspace',
+      'projects',
+      'Doist',
+      '--json',
+    ])
 
     const output = consoleSpy.mock.calls[0][0]
     const parsed = JSON.parse(output)
@@ -282,7 +335,13 @@ describe('workspace projects', () => {
   it('shows id: prefix on project IDs', async () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Backend', workspaceId: 'ws-1', folderId: 'folder-1', status: 'IN_PROGRESS' },
+        {
+          id: 'proj-1',
+          name: 'Backend',
+          workspaceId: 'ws-1',
+          folderId: 'folder-1',
+          status: 'IN_PROGRESS',
+        },
       ],
       nextCursor: null,
     })
@@ -290,14 +349,28 @@ describe('workspace projects', () => {
     const program = createProgram()
     await program.parseAsync(['node', 'td', 'workspace', 'projects', 'Doist'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('id:proj-1'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('id:proj-1')
+    )
   })
 
   it('shows blank lines between folder groups', async () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Backend', workspaceId: 'ws-1', folderId: 'folder-1', status: 'IN_PROGRESS' },
-        { id: 'proj-2', name: 'Campaign', workspaceId: 'ws-1', folderId: 'folder-2', status: 'IN_PROGRESS' },
+        {
+          id: 'proj-1',
+          name: 'Backend',
+          workspaceId: 'ws-1',
+          folderId: 'folder-1',
+          status: 'IN_PROGRESS',
+        },
+        {
+          id: 'proj-2',
+          name: 'Campaign',
+          workspaceId: 'ws-1',
+          folderId: 'folder-2',
+          status: 'IN_PROGRESS',
+        },
       ],
       nextCursor: null,
     })
@@ -313,8 +386,20 @@ describe('workspace projects', () => {
   it('shows (no folder) for projects without folder', async () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Backend', workspaceId: 'ws-1', folderId: 'folder-1', status: 'IN_PROGRESS' },
-        { id: 'proj-2', name: 'Orphan', workspaceId: 'ws-1', folderId: null, status: 'IN_PROGRESS' },
+        {
+          id: 'proj-1',
+          name: 'Backend',
+          workspaceId: 'ws-1',
+          folderId: 'folder-1',
+          status: 'IN_PROGRESS',
+        },
+        {
+          id: 'proj-2',
+          name: 'Orphan',
+          workspaceId: 'ws-1',
+          folderId: null,
+          status: 'IN_PROGRESS',
+        },
       ],
       nextCursor: null,
     })
@@ -322,7 +407,9 @@ describe('workspace projects', () => {
     const program = createProgram()
     await program.parseAsync(['node', 'td', 'workspace', 'projects', 'Doist'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('(no folder)'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('(no folder)')
+    )
   })
 })
 
@@ -346,8 +433,18 @@ describe('workspace users', () => {
   it('lists workspace users', async () => {
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', userEmail: 'alice@example.com', fullName: 'Alice Smith', role: 'ADMIN' },
-        { userId: 'user-2', userEmail: 'bob@example.com', fullName: 'Bob Jones', role: 'MEMBER' },
+        {
+          userId: 'user-1',
+          userEmail: 'alice@example.com',
+          fullName: 'Alice Smith',
+          role: 'ADMIN',
+        },
+        {
+          userId: 'user-2',
+          userEmail: 'bob@example.com',
+          fullName: 'Bob Jones',
+          role: 'MEMBER',
+        },
       ],
       hasMore: false,
     })
@@ -362,7 +459,12 @@ describe('workspace users', () => {
   it('shows user IDs with id: prefix', async () => {
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', userEmail: 'alice@example.com', fullName: 'Alice Smith', role: 'ADMIN' },
+        {
+          userId: 'user-1',
+          userEmail: 'alice@example.com',
+          fullName: 'Alice Smith',
+          role: 'ADMIN',
+        },
       ],
       hasMore: false,
     })
@@ -370,13 +472,20 @@ describe('workspace users', () => {
     const program = createProgram()
     await program.parseAsync(['node', 'td', 'workspace', 'users', 'Doist'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('id:user-1'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('id:user-1')
+    )
   })
 
   it('shows role indicators', async () => {
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', userEmail: 'alice@example.com', fullName: 'Alice', role: 'ADMIN' },
+        {
+          userId: 'user-1',
+          userEmail: 'alice@example.com',
+          fullName: 'Alice',
+          role: 'ADMIN',
+        },
       ],
       hasMore: false,
     })
@@ -390,14 +499,32 @@ describe('workspace users', () => {
   it('filters by role', async () => {
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', userEmail: 'alice@example.com', fullName: 'Alice', role: 'ADMIN' },
-        { userId: 'user-2', userEmail: 'bob@example.com', fullName: 'Bob', role: 'MEMBER' },
+        {
+          userId: 'user-1',
+          userEmail: 'alice@example.com',
+          fullName: 'Alice',
+          role: 'ADMIN',
+        },
+        {
+          userId: 'user-2',
+          userEmail: 'bob@example.com',
+          fullName: 'Bob',
+          role: 'MEMBER',
+        },
       ],
       hasMore: false,
     })
 
     const program = createProgram()
-    await program.parseAsync(['node', 'td', 'workspace', 'users', 'Doist', '--role', 'ADMIN'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'workspace',
+      'users',
+      'Doist',
+      '--role',
+      'ADMIN',
+    ])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Alice'))
     expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Bob'))
@@ -406,31 +533,68 @@ describe('workspace users', () => {
   it('filters by multiple roles', async () => {
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', userEmail: 'alice@example.com', fullName: 'Alice', role: 'ADMIN' },
-        { userId: 'user-2', userEmail: 'bob@example.com', fullName: 'Bob', role: 'MEMBER' },
-        { userId: 'user-3', userEmail: 'carol@example.com', fullName: 'Carol', role: 'GUEST' },
+        {
+          userId: 'user-1',
+          userEmail: 'alice@example.com',
+          fullName: 'Alice',
+          role: 'ADMIN',
+        },
+        {
+          userId: 'user-2',
+          userEmail: 'bob@example.com',
+          fullName: 'Bob',
+          role: 'MEMBER',
+        },
+        {
+          userId: 'user-3',
+          userEmail: 'carol@example.com',
+          fullName: 'Carol',
+          role: 'GUEST',
+        },
       ],
       hasMore: false,
     })
 
     const program = createProgram()
-    await program.parseAsync(['node', 'td', 'workspace', 'users', 'Doist', '--role', 'ADMIN,MEMBER'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'workspace',
+      'users',
+      'Doist',
+      '--role',
+      'ADMIN,MEMBER',
+    ])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Alice'))
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Bob'))
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Carol'))
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('Carol')
+    )
   })
 
   it('outputs JSON with --json flag', async () => {
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', userEmail: 'alice@example.com', fullName: 'Alice Smith', role: 'ADMIN' },
+        {
+          userId: 'user-1',
+          userEmail: 'alice@example.com',
+          fullName: 'Alice Smith',
+          role: 'ADMIN',
+        },
       ],
       hasMore: false,
     })
 
     const program = createProgram()
-    await program.parseAsync(['node', 'td', 'workspace', 'users', 'Doist', '--json'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'workspace',
+      'users',
+      'Doist',
+      '--json',
+    ])
 
     const output = consoleSpy.mock.calls[0][0]
     const parsed = JSON.parse(output)

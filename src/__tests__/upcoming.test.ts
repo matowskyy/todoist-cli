@@ -52,17 +52,34 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task in range', projectId: 'proj-1', due: { date: getDateOffset(3) } },
-        { id: 'task-2', content: 'Task out of range', projectId: 'proj-1', due: { date: getDateOffset(10) } },
+        {
+          id: 'task-1',
+          content: 'Task in range',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(3) },
+        },
+        {
+          id: 'task-2',
+          content: 'Task out of range',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(10) },
+        },
       ],
       nextCursor: null,
     })
-    mockApi.getProjects.mockResolvedValue({ results: [{ id: 'proj-1', name: 'Work' }], nextCursor: null })
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Work' }],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'upcoming'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Task in range'))
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Task out of range'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Task in range')
+    )
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('Task out of range')
+    )
   })
 
   it('accepts custom days argument', async () => {
@@ -70,17 +87,34 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task day 2', projectId: 'proj-1', due: { date: getDateOffset(2) } },
-        { id: 'task-2', content: 'Task day 5', projectId: 'proj-1', due: { date: getDateOffset(5) } },
+        {
+          id: 'task-1',
+          content: 'Task day 2',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(2) },
+        },
+        {
+          id: 'task-2',
+          content: 'Task day 5',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(5) },
+        },
       ],
       nextCursor: null,
     })
-    mockApi.getProjects.mockResolvedValue({ results: [{ id: 'proj-1', name: 'Work' }], nextCursor: null })
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Work' }],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'upcoming', '3'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Task day 2'))
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Task day 5'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Task day 2')
+    )
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('Task day 5')
+    )
   })
 
   it('always includes overdue tasks', async () => {
@@ -88,16 +122,26 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Overdue task', projectId: 'proj-1', due: { date: getDateOffset(-2) } },
+        {
+          id: 'task-1',
+          content: 'Overdue task',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(-2) },
+        },
       ],
       nextCursor: null,
     })
-    mockApi.getProjects.mockResolvedValue({ results: [{ id: 'proj-1', name: 'Work' }], nextCursor: null })
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Work' }],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'upcoming', '3'])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Overdue'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Overdue task'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Overdue task')
+    )
   })
 
   it('shows Today header for today tasks', async () => {
@@ -105,11 +149,19 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Today task', projectId: 'proj-1', due: { date: getDateOffset(0) } },
+        {
+          id: 'task-1',
+          content: 'Today task',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(0) },
+        },
       ],
       nextCursor: null,
     })
-    mockApi.getProjects.mockResolvedValue({ results: [{ id: 'proj-1', name: 'Work' }], nextCursor: null })
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Work' }],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'upcoming'])
 
@@ -121,11 +173,19 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Tomorrow task', projectId: 'proj-1', due: { date: getDateOffset(1) } },
+        {
+          id: 'task-1',
+          content: 'Tomorrow task',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(1) },
+        },
       ],
       nextCursor: null,
     })
-    mockApi.getProjects.mockResolvedValue({ results: [{ id: 'proj-1', name: 'Work' }], nextCursor: null })
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Work' }],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'upcoming'])
 
@@ -159,7 +219,12 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task', projectId: 'proj-1', due: { date: getDateOffset(1) } },
+        {
+          id: 'task-1',
+          content: 'Task',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(1) },
+        },
       ],
       nextCursor: null,
     })
@@ -177,8 +242,18 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task 1', projectId: 'proj-1', due: { date: getDateOffset(0) } },
-        { id: 'task-2', content: 'Task 2', projectId: 'proj-1', due: { date: getDateOffset(1) } },
+        {
+          id: 'task-1',
+          content: 'Task 1',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(0) },
+        },
+        {
+          id: 'task-2',
+          content: 'Task 2',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(1) },
+        },
       ],
       nextCursor: null,
     })
@@ -195,16 +270,31 @@ describe('upcoming command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task 1', projectId: 'proj-1', due: { date: getDateOffset(0) } },
-        { id: 'task-2', content: 'Task 2', projectId: 'proj-1', due: { date: getDateOffset(0) } },
+        {
+          id: 'task-1',
+          content: 'Task 1',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(0) },
+        },
+        {
+          id: 'task-2',
+          content: 'Task 2',
+          projectId: 'proj-1',
+          due: { date: getDateOffset(0) },
+        },
       ],
       nextCursor: null,
     })
-    mockApi.getProjects.mockResolvedValue({ results: [{ id: 'proj-1', name: 'Work' }], nextCursor: null })
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Work' }],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'upcoming'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Today (2)'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Today (2)')
+    )
   })
 
   it('rejects invalid days argument', async () => {

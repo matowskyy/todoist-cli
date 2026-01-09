@@ -62,7 +62,12 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Overdue task', projectId: 'proj-1', due: { date: getYesterday(), string: 'yesterday' } },
+        {
+          id: 'task-1',
+          content: 'Overdue task',
+          projectId: 'proj-1',
+          due: { date: getYesterday(), string: 'yesterday' },
+        },
       ],
       nextCursor: null,
     })
@@ -74,7 +79,9 @@ describe('today command', () => {
     await program.parseAsync(['node', 'td', 'today'])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Overdue'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Overdue task'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Overdue task')
+    )
   })
 
   it('shows tasks due today in Today section', async () => {
@@ -82,7 +89,12 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Today task', projectId: 'proj-1', due: { date: getToday(), string: 'today' } },
+        {
+          id: 'task-1',
+          content: 'Today task',
+          projectId: 'proj-1',
+          due: { date: getToday(), string: 'today' },
+        },
       ],
       nextCursor: null,
     })
@@ -94,7 +106,9 @@ describe('today command', () => {
     await program.parseAsync(['node', 'td', 'today'])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Today'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Today task'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Today task')
+    )
   })
 
   it('shows "No tasks due today" when empty', async () => {
@@ -113,7 +127,12 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Future task', projectId: 'proj-1', due: { date: '2099-12-31', string: 'Dec 31' } },
+        {
+          id: 'task-1',
+          content: 'Future task',
+          projectId: 'proj-1',
+          due: { date: '2099-12-31', string: 'Dec 31' },
+        },
       ],
       nextCursor: null,
     })
@@ -129,7 +148,12 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Today task', projectId: 'proj-1', due: { date: getToday() } },
+        {
+          id: 'task-1',
+          content: 'Today task',
+          projectId: 'proj-1',
+          due: { date: getToday() },
+        },
       ],
       nextCursor: null,
     })
@@ -147,8 +171,18 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task 1', projectId: 'proj-1', due: { date: getToday() } },
-        { id: 'task-2', content: 'Task 2', projectId: 'proj-1', due: { date: getYesterday() } },
+        {
+          id: 'task-1',
+          content: 'Task 1',
+          projectId: 'proj-1',
+          due: { date: getToday() },
+        },
+        {
+          id: 'task-2',
+          content: 'Task 2',
+          projectId: 'proj-1',
+          due: { date: getYesterday() },
+        },
       ],
       nextCursor: null,
     })
@@ -165,7 +199,12 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Task', projectId: 'proj-1', due: { date: getToday() } },
+        {
+          id: 'task-1',
+          content: 'Task',
+          projectId: 'proj-1',
+          due: { date: getToday() },
+        },
       ],
       nextCursor: null,
     })
@@ -184,8 +223,18 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Personal task', projectId: 'proj-personal', due: { date: getToday() } },
-        { id: 'task-2', content: 'Workspace task', projectId: 'proj-workspace', due: { date: getToday() } },
+        {
+          id: 'task-1',
+          content: 'Personal task',
+          projectId: 'proj-personal',
+          due: { date: getToday() },
+        },
+        {
+          id: 'task-2',
+          content: 'Workspace task',
+          projectId: 'proj-workspace',
+          due: { date: getToday() },
+        },
       ],
       nextCursor: null,
     })
@@ -199,8 +248,12 @@ describe('today command', () => {
 
     await program.parseAsync(['node', 'td', 'today', '--personal'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Personal task'))
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Workspace task'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Personal task')
+    )
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('Workspace task')
+    )
   })
 
   it('filters by --workspace to show only workspace tasks', async () => {
@@ -208,8 +261,18 @@ describe('today command', () => {
 
     mockApi.getTasks.mockResolvedValue({
       results: [
-        { id: 'task-1', content: 'Personal task', projectId: 'proj-personal', due: { date: getToday() } },
-        { id: 'task-2', content: 'Workspace task', projectId: 'proj-workspace', due: { date: getToday() } },
+        {
+          id: 'task-1',
+          content: 'Personal task',
+          projectId: 'proj-personal',
+          due: { date: getToday() },
+        },
+        {
+          id: 'task-2',
+          content: 'Workspace task',
+          projectId: 'proj-workspace',
+          due: { date: getToday() },
+        },
       ],
       nextCursor: null,
     })
@@ -220,12 +283,18 @@ describe('today command', () => {
       ],
       nextCursor: null,
     })
-    mockFetchWorkspaces.mockResolvedValue([{ id: 'ws-1', name: 'Acme Corp' } as any])
+    mockFetchWorkspaces.mockResolvedValue([
+      { id: 'ws-1', name: 'Acme Corp' } as any,
+    ])
 
     await program.parseAsync(['node', 'td', 'today', '--workspace', 'Acme'])
 
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Personal task'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Workspace task'))
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('Personal task')
+    )
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Workspace task')
+    )
   })
 
   it('throws error when both --workspace and --personal specified', async () => {
@@ -234,7 +303,14 @@ describe('today command', () => {
     mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
 
     await expect(
-      program.parseAsync(['node', 'td', 'today', '--workspace', 'Acme', '--personal'])
+      program.parseAsync([
+        'node',
+        'td',
+        'today',
+        '--workspace',
+        'Acme',
+        '--personal',
+      ])
     ).rejects.toThrow('mutually exclusive')
   })
 })

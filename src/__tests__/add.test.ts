@@ -108,7 +108,12 @@ describe('add command', () => {
       due: { date: '2026-01-10', string: 'tomorrow' },
     })
 
-    await program.parseAsync(['node', 'td', 'add', 'Buy milk tomorrow p1 #Shopping'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'add',
+      'Buy milk tomorrow p1 #Shopping',
+    ])
 
     expect(mockApi.quickAddTask).toHaveBeenCalledWith({
       text: 'Buy milk tomorrow p1 #Shopping',
@@ -126,16 +131,29 @@ describe('add command', () => {
       projectId: 'proj-1',
       due: null,
     })
-    mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'Work', isShared: true })
+    mockApi.getProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'Work',
+      isShared: true,
+    })
     mockApi.updateTask.mockResolvedValue({
       id: 'task-1',
       content: 'Review PR',
       due: null,
     })
 
-    await program.parseAsync(['node', 'td', 'add', 'Review PR', '--assignee', 'id:user-123'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'add',
+      'Review PR',
+      '--assignee',
+      'id:user-123',
+    ])
 
-    expect(mockApi.updateTask).toHaveBeenCalledWith('task-1', { assigneeId: 'user-123' })
+    expect(mockApi.updateTask).toHaveBeenCalledWith('task-1', {
+      assigneeId: 'user-123',
+    })
     consoleSpy.mockRestore()
   })
 })

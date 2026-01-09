@@ -11,7 +11,9 @@ interface AddOptions {
 export function registerAddCommand(program: Command): void {
   program
     .command('add <text>')
-    .description('Quick add task with natural language (e.g., "Buy milk tomorrow p1 #Shopping")')
+    .description(
+      'Quick add task with natural language (e.g., "Buy milk tomorrow p1 #Shopping")'
+    )
     .option('--assignee <ref>', 'Assign to user (name, email, id:xxx, or "me")')
     .action(async (text: string, options: AddOptions) => {
       const api = await getApi()
@@ -19,7 +21,11 @@ export function registerAddCommand(program: Command): void {
 
       if (options.assignee) {
         const project = await api.getProject(task.projectId)
-        const assigneeId = await resolveAssigneeId(api, options.assignee, project)
+        const assigneeId = await resolveAssigneeId(
+          api,
+          options.assignee,
+          project
+        )
         task = await api.updateTask(task.id, { assigneeId })
       }
 

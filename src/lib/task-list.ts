@@ -1,6 +1,18 @@
-import { getApi, getCurrentUserId, isWorkspaceProject, type Project, type Section } from './api.js'
+import {
+  getApi,
+  getCurrentUserId,
+  isWorkspaceProject,
+  type Project,
+  type Section,
+} from './api.js'
 import { resolveWorkspaceRef } from './refs.js'
-import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from './output.js'
+import {
+  formatTaskRow,
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+  formatError,
+} from './output.js'
 import { paginate, LIMITS } from './pagination.js'
 import { CollaboratorCache, formatAssignee } from './collaborators.js'
 import type { Task, TodoistApi } from '@doist/todoist-api-typescript'
@@ -11,10 +23,13 @@ export async function filterByWorkspaceOrPersonal(
   tasks: Task[],
   workspace: string | undefined,
   personal: boolean | undefined
-): Promise<{ tasks: Task[], projects: Map<string, Project> }> {
+): Promise<{ tasks: Task[]; projects: Map<string, Project> }> {
   if (workspace && personal) {
     throw new Error(
-      formatError('CONFLICTING_FILTERS', '--workspace and --personal are mutually exclusive.')
+      formatError(
+        'CONFLICTING_FILTERS',
+        '--workspace and --personal are mutually exclusive.'
+      )
     )
   }
 
@@ -30,7 +45,9 @@ export async function filterByWorkspaceOrPersonal(
     const ws = await resolveWorkspaceRef(workspace)
     filtered = tasks.filter((t) => {
       const project = projects.get(t.projectId)
-      return project && isWorkspaceProject(project) && project.workspaceId === ws.id
+      return (
+        project && isWorkspaceProject(project) && project.workspaceId === ws.id
+      )
     })
   } else if (personal) {
     filtered = tasks.filter((t) => {
@@ -64,7 +81,10 @@ export function parsePriority(p: string): number {
   const match = /^p([1-4])$/.exec(p.toLowerCase())
   if (!match) {
     throw new Error(
-      formatError('INVALID_PRIORITY', `Invalid priority "${p}". Use p1, p2, p3, or p4.`)
+      formatError(
+        'INVALID_PRIORITY',
+        `Invalid priority "${p}". Use p1, p2, p3, or p4.`
+      )
     )
   }
   return 5 - parseInt(match[1], 10)
@@ -104,7 +124,12 @@ function formatGroupedTaskList(
   if (noSection.length > 0) {
     lines.push(chalk.italic.dim(`(no section) (${noSection.length})`))
     for (const task of noSection) {
-      const assignee = formatAssignee(task.responsibleUid, task.projectId, projects, collaboratorCache)
+      const assignee = formatAssignee(
+        task.responsibleUid,
+        task.projectId,
+        projects,
+        collaboratorCache
+      )
       lines.push(formatTaskRow(task, undefined, assignee ?? undefined))
       lines.push('')
     }
@@ -115,7 +140,12 @@ function formatGroupedTaskList(
     if (sectionTasks && sectionTasks.length > 0) {
       lines.push(`${section.name} (${sectionTasks.length})`)
       for (const task of sectionTasks) {
-        const assignee = formatAssignee(task.responsibleUid, task.projectId, projects, collaboratorCache)
+        const assignee = formatAssignee(
+          task.responsibleUid,
+          task.projectId,
+          projects,
+          collaboratorCache
+        )
         lines.push(formatTaskRow(task, undefined, assignee ?? undefined))
         lines.push('')
       }
@@ -136,7 +166,12 @@ function formatFlatTaskList(
 
   const blocks = tasks.map((task) => {
     const projectName = projects.get(task.projectId)?.name
-    const assignee = formatAssignee(task.responsibleUid, task.projectId, projects, collaboratorCache)
+    const assignee = formatAssignee(
+      task.responsibleUid,
+      task.projectId,
+      projects,
+      collaboratorCache
+    )
     return formatTaskRow(task, projectName, assignee ?? undefined)
   })
 
@@ -213,17 +248,32 @@ export async function listTasksForProject(
   }
 
   const filterResult = await filterByWorkspaceOrPersonal(
-    api, filtered, options.workspace, options.personal
+    api,
+    filtered,
+    options.workspace,
+    options.personal
   )
   filtered = filterResult.tasks
 
   if (options.json) {
-    console.log(formatPaginatedJson({ results: filtered, nextCursor }, 'task', options.full))
+    console.log(
+      formatPaginatedJson(
+        { results: filtered, nextCursor },
+        'task',
+        options.full
+      )
+    )
     return
   }
 
   if (options.ndjson) {
-    console.log(formatPaginatedNdjson({ results: filtered, nextCursor }, 'task', options.full))
+    console.log(
+      formatPaginatedNdjson(
+        { results: filtered, nextCursor },
+        'task',
+        options.full
+      )
+    )
     return
   }
 
@@ -236,7 +286,15 @@ export async function listTasksForProject(
       api.getProject(projectId),
       api.getSections({ projectId }),
     ])
-    console.log(formatGroupedTaskList(filtered, projectRes, sectionsRes.results, projects, collaboratorCache))
+    console.log(
+      formatGroupedTaskList(
+        filtered,
+        projectRes,
+        sectionsRes.results,
+        projects,
+        collaboratorCache
+      )
+    )
   } else {
     console.log(formatFlatTaskList(filtered, projects, collaboratorCache))
   }

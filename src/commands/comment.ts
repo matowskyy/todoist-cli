@@ -1,6 +1,11 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
-import { formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
+import {
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+  formatError,
+} from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { requireIdRef, resolveTaskRef } from '../lib/refs.js'
 import chalk from 'chalk'
@@ -13,7 +18,10 @@ interface ListOptions {
   full?: boolean
 }
 
-async function listComments(taskRef: string, options: ListOptions): Promise<void> {
+async function listComments(
+  taskRef: string,
+  options: ListOptions
+): Promise<void> {
   const api = await getApi()
   const task = await resolveTaskRef(api, taskRef)
 
@@ -24,17 +32,30 @@ async function listComments(taskRef: string, options: ListOptions): Promise<void
       : LIMITS.comments
 
   const { results: comments, nextCursor } = await paginate(
-    (cursor, limit) => api.getComments({ taskId: task.id, cursor: cursor ?? undefined, limit }),
+    (cursor, limit) =>
+      api.getComments({ taskId: task.id, cursor: cursor ?? undefined, limit }),
     { limit: targetLimit }
   )
 
   if (options.json) {
-    console.log(formatPaginatedJson({ results: comments, nextCursor }, 'comment', options.full))
+    console.log(
+      formatPaginatedJson(
+        { results: comments, nextCursor },
+        'comment',
+        options.full
+      )
+    )
     return
   }
 
   if (options.ndjson) {
-    console.log(formatPaginatedNdjson({ results: comments, nextCursor }, 'comment', options.full))
+    console.log(
+      formatPaginatedNdjson(
+        { results: comments, nextCursor },
+        'comment',
+        options.full
+      )
+    )
     return
   }
 
@@ -70,9 +91,14 @@ async function addComment(taskRef: string, options: AddOptions): Promise<void> {
   console.log(chalk.dim(`ID: ${comment.id}`))
 }
 
-async function deleteComment(commentId: string, options: { yes?: boolean }): Promise<void> {
+async function deleteComment(
+  commentId: string,
+  options: { yes?: boolean }
+): Promise<void> {
   if (!options.yes) {
-    throw new Error(formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.'))
+    throw new Error(
+      formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.')
+    )
   }
 
   const api = await getApi()

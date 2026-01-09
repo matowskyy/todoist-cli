@@ -1,6 +1,18 @@
 import { Command } from 'commander'
-import { getApi, fetchWorkspaces, fetchWorkspaceFolders, isWorkspaceProject, type Project, type Workspace } from '../lib/api.js'
-import { formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
+import {
+  getApi,
+  fetchWorkspaces,
+  fetchWorkspaceFolders,
+  isWorkspaceProject,
+  type Project,
+  type Workspace,
+} from '../lib/api.js'
+import {
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+  formatError,
+} from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { resolveProjectRef } from '../lib/refs.js'
 import { formatUserShortName } from '../lib/collaborators.js'
@@ -31,12 +43,24 @@ async function listProjects(options: ListOptions): Promise<void> {
   )
 
   if (options.json) {
-    console.log(formatPaginatedJson({ results: projects, nextCursor }, 'project', options.full))
+    console.log(
+      formatPaginatedJson(
+        { results: projects, nextCursor },
+        'project',
+        options.full
+      )
+    )
     return
   }
 
   if (options.ndjson) {
-    console.log(formatPaginatedNdjson({ results: projects, nextCursor }, 'project', options.full))
+    console.log(
+      formatPaginatedNdjson(
+        { results: projects, nextCursor },
+        'project',
+        options.full
+      )
+    )
     return
   }
 
@@ -104,7 +128,9 @@ async function listProjects(options: ListOptions): Promise<void> {
     console.log(chalk.bold(workspaceName))
     for (const project of wprojects) {
       const id = chalk.dim(project.id)
-      const name = project.isFavorite ? chalk.yellow(project.name) : project.name
+      const name = project.isFavorite
+        ? chalk.yellow(project.name)
+        : project.name
       console.log(`  ${id}  ${name}`)
     }
     console.log('')
@@ -112,7 +138,11 @@ async function listProjects(options: ListOptions): Promise<void> {
   console.log(formatNextCursorFooter(nextCursor))
 
   if (sortedWorkspaceIds.length > 0) {
-    console.log(chalk.dim('Tip: Use `td workspace projects <name>` for a detailed view with folders.'))
+    console.log(
+      chalk.dim(
+        'Tip: Use `td workspace projects <name>` for a detailed view with folders.'
+      )
+    )
   }
 }
 

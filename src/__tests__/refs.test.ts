@@ -54,7 +54,9 @@ describe('requireIdRef', () => {
 
   it('throws with formatted error for invalid ref', () => {
     expect(() => requireIdRef('some-name', 'comment')).toThrow('INVALID_REF')
-    expect(() => requireIdRef('some-name', 'comment')).toThrow('Invalid comment reference')
+    expect(() => requireIdRef('some-name', 'comment')).toThrow(
+      'Invalid comment reference'
+    )
   })
 
   it('includes hint in error message', () => {
@@ -102,7 +104,9 @@ describe('resolveTaskRef', () => {
       getTasks: vi.fn().mockResolvedValue({ results: tasks }),
     })
 
-    await expect(resolveTaskRef(api, 'Buy')).rejects.toThrow('Multiple tasks match')
+    await expect(resolveTaskRef(api, 'Buy')).rejects.toThrow(
+      'Multiple tasks match'
+    )
   })
 
   it('throws when not found', async () => {
@@ -110,7 +114,9 @@ describe('resolveTaskRef', () => {
       getTasks: vi.fn().mockResolvedValue({ results: tasks }),
     })
 
-    await expect(resolveTaskRef(api, 'nonexistent')).rejects.toThrow('not found')
+    await expect(resolveTaskRef(api, 'nonexistent')).rejects.toThrow(
+      'not found'
+    )
   })
 })
 
@@ -164,10 +170,14 @@ describe('resolveProjectRef', () => {
       { id: 'proj-2', name: 'Shopping Ideas' },
     ]
     const api = createMockApi({
-      getProjects: vi.fn().mockResolvedValue({ results: projectsWithAmbiguity }),
+      getProjects: vi
+        .fn()
+        .mockResolvedValue({ results: projectsWithAmbiguity }),
     })
 
-    await expect(resolveProjectRef(api, 'Shopping')).rejects.toThrow('Multiple projects match')
+    await expect(resolveProjectRef(api, 'Shopping')).rejects.toThrow(
+      'Multiple projects match'
+    )
   })
 
   it('throws when not found', async () => {
@@ -175,7 +185,9 @@ describe('resolveProjectRef', () => {
       getProjects: vi.fn().mockResolvedValue({ results: projects }),
     })
 
-    await expect(resolveProjectRef(api, 'nonexistent')).rejects.toThrow('not found')
+    await expect(resolveProjectRef(api, 'nonexistent')).rejects.toThrow(
+      'not found'
+    )
   })
 })
 
@@ -222,9 +234,9 @@ describe('resolveSectionId', () => {
       getSections: vi.fn().mockResolvedValue({ results: sections }),
     })
 
-    await expect(resolveSectionId(api, 'id:nonexistent', 'proj-1')).rejects.toThrow(
-      'does not belong to this project'
-    )
+    await expect(
+      resolveSectionId(api, 'id:nonexistent', 'proj-1')
+    ).rejects.toThrow('does not belong to this project')
   })
 
   it('resolves exact name match (case insensitive)', async () => {
@@ -260,9 +272,9 @@ describe('resolveSectionId', () => {
       getSections: vi.fn().mockResolvedValue({ results: sections }),
     })
 
-    await expect(resolveSectionId(api, 'Nonexistent', 'proj-1')).rejects.toThrow(
-      'not found in project'
-    )
+    await expect(
+      resolveSectionId(api, 'Nonexistent', 'proj-1')
+    ).rejects.toThrow('not found in project')
   })
 })
 
@@ -304,7 +316,12 @@ describe('resolveParentTaskId', () => {
         .mockResolvedValueOnce({ results: projectTasks }),
     })
 
-    const result = await resolveParentTaskId(api, 'documentation', 'proj-1', 'sec-1')
+    const result = await resolveParentTaskId(
+      api,
+      'documentation',
+      'proj-1',
+      'sec-1'
+    )
     expect(result).toBe('task-3')
     expect(api.getTasks).toHaveBeenCalledTimes(2)
   })
@@ -324,9 +341,9 @@ describe('resolveParentTaskId', () => {
       getTasks: vi.fn().mockResolvedValue({ results: sectionTasks }),
     })
 
-    await expect(resolveParentTaskId(api, 'Setup', 'proj-1', 'sec-1')).rejects.toThrow(
-      'Multiple tasks match'
-    )
+    await expect(
+      resolveParentTaskId(api, 'Setup', 'proj-1', 'sec-1')
+    ).rejects.toThrow('Multiple tasks match')
   })
 
   it('throws on ambiguous match in project', async () => {
@@ -348,8 +365,8 @@ describe('resolveParentTaskId', () => {
       getTasks: vi.fn().mockResolvedValue({ results: projectTasks }),
     })
 
-    await expect(resolveParentTaskId(api, 'Nonexistent', 'proj-1')).rejects.toThrow(
-      'not found in project'
-    )
+    await expect(
+      resolveParentTaskId(api, 'Nonexistent', 'proj-1')
+    ).rejects.toThrow('not found in project')
   })
 })

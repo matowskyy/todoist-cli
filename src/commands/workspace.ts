@@ -44,28 +44,32 @@ async function listWorkspaces(options: ListOptions): Promise<void> {
   }
 
   if (options.json) {
-    const output = options.full ? workspaces : workspaces.map((w) => ({
-      id: w.id,
-      name: w.name,
-      plan: w.plan,
-      role: w.role,
-      memberCount: w.currentMemberCount,
-      projectCount: w.currentActiveProjects,
-    }))
+    const output = options.full
+      ? workspaces
+      : workspaces.map((w) => ({
+          id: w.id,
+          name: w.name,
+          plan: w.plan,
+          role: w.role,
+          memberCount: w.currentMemberCount,
+          projectCount: w.currentActiveProjects,
+        }))
     console.log(JSON.stringify({ results: output, nextCursor: null }, null, 2))
     return
   }
 
   if (options.ndjson) {
     for (const w of workspaces) {
-      const output = options.full ? w : {
-        id: w.id,
-        name: w.name,
-        plan: w.plan,
-        role: w.role,
-        memberCount: w.currentMemberCount,
-        projectCount: w.currentActiveProjects,
-      }
+      const output = options.full
+        ? w
+        : {
+            id: w.id,
+            name: w.name,
+            plan: w.plan,
+            role: w.role,
+            memberCount: w.currentMemberCount,
+            projectCount: w.currentActiveProjects,
+          }
       console.log(JSON.stringify(output))
     }
     return
@@ -75,7 +79,9 @@ async function listWorkspaces(options: ListOptions): Promise<void> {
     const id = chalk.dim(`id:${w.id}`)
     const name = w.name
     const plan = chalk.cyan(`(${w.plan})`)
-    const stats = chalk.dim(`${w.currentMemberCount} members, ${w.currentActiveProjects} projects`)
+    const stats = chalk.dim(
+      `${w.currentMemberCount} members, ${w.currentActiveProjects} projects`
+    )
     const role = chalk.yellow(`[${w.role}]`)
     console.log(`${id}  ${name} ${plan} - ${stats} ${role}`)
   }
@@ -93,11 +99,16 @@ async function viewWorkspace(ref: string): Promise<void> {
     console.log(`Domain:   ${workspace.domainName}`)
   }
   const { adminCount, memberCount, guestCount } = workspace.memberCountByType
-  console.log(`Members:  ${workspace.currentMemberCount} (${adminCount} admins, ${memberCount} members, ${guestCount} guests)`)
+  console.log(
+    `Members:  ${workspace.currentMemberCount} (${adminCount} admins, ${memberCount} members, ${guestCount} guests)`
+  )
   console.log(`Projects: ${workspace.currentActiveProjects} active`)
 }
 
-async function listWorkspaceProjects(ref: string, options: ProjectsOptions): Promise<void> {
+async function listWorkspaceProjects(
+  ref: string,
+  options: ProjectsOptions
+): Promise<void> {
   const workspace = await resolveWorkspaceRef(ref)
   const api = await getApi()
 
@@ -129,7 +140,10 @@ async function listWorkspaceProjects(ref: string, options: ProjectsOptions): Pro
           id: p.id,
           name: p.name,
           folderId: isWorkspaceProject(p) ? p.folderId : null,
-          folderName: isWorkspaceProject(p) && p.folderId ? folderMap.get(p.folderId) : null,
+          folderName:
+            isWorkspaceProject(p) && p.folderId
+              ? folderMap.get(p.folderId)
+              : null,
           status: isWorkspaceProject(p) ? p.status : null,
         }))
     console.log(JSON.stringify({ results: output, nextCursor }, null, 2))
@@ -144,7 +158,10 @@ async function listWorkspaceProjects(ref: string, options: ProjectsOptions): Pro
             id: p.id,
             name: p.name,
             folderId: isWorkspaceProject(p) ? p.folderId : null,
-            folderName: isWorkspaceProject(p) && p.folderId ? folderMap.get(p.folderId) : null,
+            folderName:
+              isWorkspaceProject(p) && p.folderId
+                ? folderMap.get(p.folderId)
+                : null,
             status: isWorkspaceProject(p) ? p.status : null,
           }
       console.log(JSON.stringify(output))
@@ -178,7 +195,8 @@ async function listWorkspaceProjects(ref: string, options: ProjectsOptions): Pro
     if (projects.length === 0) continue
 
     const folderName = folderId ? folderMap.get(folderId) : null
-    const hasHeader = folderName || (folderId === null && projectsByFolder.size > 1)
+    const hasHeader =
+      folderName || (folderId === null && projectsByFolder.size > 1)
 
     if (!isFirst && hasHeader) {
       console.log('')
@@ -200,11 +218,16 @@ async function listWorkspaceProjects(ref: string, options: ProjectsOptions): Pro
   }
 
   if (nextCursor) {
-    console.log(chalk.dim(`\n... more items exist. Use --all to fetch everything.`))
+    console.log(
+      chalk.dim(`\n... more items exist. Use --all to fetch everything.`)
+    )
   }
 }
 
-async function listWorkspaceUsers(ref: string, options: UsersOptions): Promise<void> {
+async function listWorkspaceUsers(
+  ref: string,
+  options: UsersOptions
+): Promise<void> {
   const workspace = await resolveWorkspaceRef(ref)
   const api = await getApi()
 
@@ -216,7 +239,12 @@ async function listWorkspaceUsers(ref: string, options: UsersOptions): Promise<v
 
   let roleFilter: Set<string> | null = null
   if (options.role) {
-    roleFilter = new Set(options.role.toUpperCase().split(',').map((r) => r.trim()))
+    roleFilter = new Set(
+      options.role
+        .toUpperCase()
+        .split(',')
+        .map((r) => r.trim())
+    )
   }
 
   const allUsers: Array<{
@@ -254,24 +282,34 @@ async function listWorkspaceUsers(ref: string, options: UsersOptions): Promise<v
   const hasMore = allUsers.length > targetLimit || cursor !== undefined
 
   if (options.json) {
-    const output = options.full ? users : users.map((u) => ({
-      id: u.userId,
-      name: u.fullName,
-      email: u.email,
-      role: u.role,
-    }))
-    console.log(JSON.stringify({ results: output, nextCursor: hasMore ? cursor : null }, null, 2))
+    const output = options.full
+      ? users
+      : users.map((u) => ({
+          id: u.userId,
+          name: u.fullName,
+          email: u.email,
+          role: u.role,
+        }))
+    console.log(
+      JSON.stringify(
+        { results: output, nextCursor: hasMore ? cursor : null },
+        null,
+        2
+      )
+    )
     return
   }
 
   if (options.ndjson) {
     for (const u of users) {
-      const output = options.full ? u : {
-        id: u.userId,
-        name: u.fullName,
-        email: u.email,
-        role: u.role,
-      }
+      const output = options.full
+        ? u
+        : {
+            id: u.userId,
+            name: u.fullName,
+            email: u.email,
+            role: u.role,
+          }
       console.log(JSON.stringify(output))
     }
     if (hasMore) {
@@ -289,12 +327,16 @@ async function listWorkspaceUsers(ref: string, options: UsersOptions): Promise<v
   }
 
   if (hasMore) {
-    console.log(chalk.dim(`\n... more items exist. Use --all to fetch everything.`))
+    console.log(
+      chalk.dim(`\n... more items exist. Use --all to fetch everything.`)
+    )
   }
 }
 
 export function registerWorkspaceCommand(program: Command): void {
-  const workspace = program.command('workspace').description('Manage workspaces')
+  const workspace = program
+    .command('workspace')
+    .description('Manage workspaces')
 
   workspace
     .command('list')
@@ -323,7 +365,10 @@ export function registerWorkspaceCommand(program: Command): void {
   workspace
     .command('users <ref>')
     .description('List users in a workspace')
-    .option('--role <roles>', 'Filter by role (comma-separated: ADMIN,MEMBER,GUEST)')
+    .option(
+      '--role <roles>',
+      'Filter by role (comma-separated: ADMIN,MEMBER,GUEST)'
+    )
     .option('--limit <n>', 'Limit number of results')
     .option('--cursor <cursor>', 'Continue from cursor')
     .option('--all', 'Fetch all results (no limit)')

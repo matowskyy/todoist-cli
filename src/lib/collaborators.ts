@@ -12,7 +12,10 @@ export interface CollaboratorInfo {
 
 export class CollaboratorCache {
   private workspaceUsers = new Map<string, Map<string, CollaboratorInfo>>()
-  private projectCollaborators = new Map<string, Map<string, CollaboratorInfo>>()
+  private projectCollaborators = new Map<
+    string,
+    Map<string, CollaboratorInfo>
+  >()
 
   async preload(
     api: TodoistApi,
@@ -59,7 +62,10 @@ export class CollaboratorCache {
     await Promise.all(fetches)
   }
 
-  private async fetchWorkspaceUsers(api: TodoistApi, workspaceId: string): Promise<void> {
+  private async fetchWorkspaceUsers(
+    api: TodoistApi,
+    workspaceId: string
+  ): Promise<void> {
     const userMap = new Map<string, CollaboratorInfo>()
     let cursor: string | undefined
 
@@ -86,7 +92,10 @@ export class CollaboratorCache {
     this.workspaceUsers.set(workspaceId, userMap)
   }
 
-  private async fetchProjectCollaborators(api: TodoistApi, projectId: string): Promise<void> {
+  private async fetchProjectCollaborators(
+    api: TodoistApi,
+    projectId: string
+  ): Promise<void> {
     const userMap = new Map<string, CollaboratorInfo>()
     let cursor: string | undefined
 
@@ -108,7 +117,11 @@ export class CollaboratorCache {
     this.projectCollaborators.set(projectId, userMap)
   }
 
-  getUserName(userId: string, projectId: string, projects: Map<string, Project>): string | null {
+  getUserName(
+    userId: string,
+    projectId: string,
+    projects: Map<string, Project>
+  ): string | null {
     const project = projects.get(projectId)
     if (!project) return null
 
@@ -184,7 +197,9 @@ async function fetchCollaboratorsForProject(
     let cursor: string | undefined
 
     while (true) {
-      const response = await api.getProjectCollaborators(project.id, { cursor })
+      const response = await api.getProjectCollaborators(project.id, {
+        cursor,
+      })
 
       for (const user of response.results) {
         users.push({
@@ -227,7 +242,9 @@ export async function resolveAssigneeId(
   const exactEmail = collaborators.find((c) => c.email.toLowerCase() === lower)
   if (exactEmail) return exactEmail.id
 
-  const partialName = collaborators.filter((c) => c.name.toLowerCase().includes(lower))
+  const partialName = collaborators.filter((c) =>
+    c.name.toLowerCase().includes(lower)
+  )
   if (partialName.length === 1) return partialName[0].id
   if (partialName.length > 1) {
     throw new Error(
@@ -239,7 +256,5 @@ export async function resolveAssigneeId(
     )
   }
 
-  throw new Error(
-    formatError('ASSIGNEE_NOT_FOUND', `User "${ref}" not found.`)
-  )
+  throw new Error(formatError('ASSIGNEE_NOT_FOUND', `User "${ref}" not found.`))
 }

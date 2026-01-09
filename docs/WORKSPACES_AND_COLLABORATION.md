@@ -2,20 +2,20 @@
 
 ## Quick Reference
 
-| Feature | Command / Flag | Notes |
-|---------|---------------|-------|
-| List workspaces | `td workspace list` | Silent if empty |
-| View workspace | `td workspace view <ref>` | Fuzzy match supported |
-| Workspace projects | `td workspace projects <ref>` | Nested tree with folders |
-| Workspace users | `td workspace users <ref>` | --role ADMIN,MEMBER filter |
-| Project collaborators | `td project collaborators <ref>` | Errors on non-shared |
-| Assign task | `--assignee <ref>` or `--assignee me` | Works on add/update |
-| Unassign task | `--unassign` | Dedicated flag |
-| Filter by assignee | `--assignee <ref>` | On task list commands |
-| Filter unassigned | `--unassigned` | Tasks with no assignee |
-| Show all assignees | `--any-assignee` | Override default filter |
-| Filter by workspace | `--workspace <ref>` | On task commands; mutually exclusive with --personal |
-| Filter personal | `--personal` | On task and project list commands |
+| Feature               | Command / Flag                        | Notes                                                |
+| --------------------- | ------------------------------------- | ---------------------------------------------------- |
+| List workspaces       | `td workspace list`                   | Silent if empty                                      |
+| View workspace        | `td workspace view <ref>`             | Fuzzy match supported                                |
+| Workspace projects    | `td workspace projects <ref>`         | Nested tree with folders                             |
+| Workspace users       | `td workspace users <ref>`            | --role ADMIN,MEMBER filter                           |
+| Project collaborators | `td project collaborators <ref>`      | Errors on non-shared                                 |
+| Assign task           | `--assignee <ref>` or `--assignee me` | Works on add/update                                  |
+| Unassign task         | `--unassign`                          | Dedicated flag                                       |
+| Filter by assignee    | `--assignee <ref>`                    | On task list commands                                |
+| Filter unassigned     | `--unassigned`                        | Tasks with no assignee                               |
+| Show all assignees    | `--any-assignee`                      | Override default filter                              |
+| Filter by workspace   | `--workspace <ref>`                   | On task commands; mutually exclusive with --personal |
+| Filter personal       | `--personal`                          | On task and project list commands                    |
 
 ---
 
@@ -24,10 +24,12 @@
 ### Display Format
 
 **Assignee display**: `+FirstName L.` (consistent with Todoist quick-add syntax)
+
 - Examples: `+Andrew W.`, `+Craig M.`, `+Madonna` (single word = no initial)
 - For orphan assignees (removed users): `+330121` (raw ID)
 
 **Project list grouping**:
+
 - Projects grouped by workspace, with workspace name as header
 - Personal projects listed first, then workspaces sorted alphabetically
 - Shared personal projects: `[shared]` marker
@@ -37,6 +39,7 @@
 ### Default Behavior: Today & Upcoming
 
 `td today` and `td upcoming` default to showing only:
+
 - Tasks assigned to current user ("me")
 - Tasks with no assignee (unassigned)
 
@@ -81,6 +84,7 @@ Build the foundation for workspace awareness.
 #### 1.1 Sync API Helper
 
 Add to `src/lib/api.ts`:
+
 - `fetchWorkspaces(token)` - raw Sync API call for workspace list
 - Returns: `{ id, name, plan, role, memberCount, projectCount }`
 
@@ -146,6 +150,7 @@ td workspace users id:69 --role ADMIN,MEMBER
 - `--role` filter accepts multiple: `--role ADMIN,MEMBER`
 
 **Files**:
+
 - `src/commands/workspace.ts` (new)
 - `src/lib/api.ts` (add Sync API helper)
 
@@ -177,6 +182,7 @@ Today (3)
 #### 2.2 Collaborator Cache
 
 Add `src/lib/collaborators.ts`:
+
 - `CollaboratorCache` class with methods:
   - `preload(api, tasks)` - scan tasks, batch fetch collaborators
   - `getUserName(userId, projectId)` - lookup from cache
@@ -185,10 +191,12 @@ Add `src/lib/collaborators.ts`:
 #### 2.3 Default Filter for Today/Upcoming
 
 Modify `src/commands/today.ts` and `src/commands/upcoming.ts`:
+
 - Default: only show tasks where `assignee_id` is null OR equals current user ID
 - Add `--any-assignee` flag to show all tasks
 
 **Files**:
+
 - `src/lib/task-list.ts`
 - `src/lib/output.ts`
 - `src/lib/collaborators.ts` (new)
@@ -231,6 +239,7 @@ td task list --unassigned
 ```
 
 **Files**:
+
 - `src/commands/task.ts`
 - `src/commands/add.ts`
 - `src/lib/collaborators.ts`
@@ -276,6 +285,7 @@ td project collaborators "1:1 Paul-Ernesto"
 #### 4.3 Enhanced `td project view`
 
 For workspace projects, show workspace and folder info:
+
 ```
 td project view "Q1 Planning"
 
@@ -294,11 +304,13 @@ URL:       https://app.todoist.com/app/project/...
 ```
 
 For shared personal projects, show shared status:
+
 ```
 Shared:    Yes
 ```
 
 **Files**:
+
 - `src/commands/project.ts`
 - `src/lib/output.ts`
 
@@ -329,6 +341,7 @@ td upcoming --personal
 - `--workspace` and `--personal` are mutually exclusive (error if both specified)
 
 **Files**:
+
 - `src/commands/project.ts`
 - `src/commands/task.ts`
 - `src/commands/today.ts`
@@ -411,18 +424,18 @@ After each phase, verify:
 
 ### REST API v2 (via TypeScript library)
 
-| Method | Use |
-|--------|-----|
-| `getProjects()` | List all projects (returns PersonalProject \| WorkspaceProject) |
-| `getProjectCollaborators(projectId)` | Get collaborators for shared project |
-| `addTask({ assigneeId })` | Create task with assignee |
-| `updateTask(id, { assigneeId })` | Update task assignee |
-| `getWorkspaceUsers({ workspaceId })` | Get workspace members |
+| Method                               | Use                                                             |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `getProjects()`                      | List all projects (returns PersonalProject \| WorkspaceProject) |
+| `getProjectCollaborators(projectId)` | Get collaborators for shared project                            |
+| `addTask({ assigneeId })`            | Create task with assignee                                       |
+| `updateTask(id, { assigneeId })`     | Update task assignee                                            |
+| `getWorkspaceUsers({ workspaceId })` | Get workspace members                                           |
 
 ### Sync API v9 (raw fetch)
 
-| Endpoint | Use |
-|----------|-----|
+| Endpoint                                          | Use                |
+| ------------------------------------------------- | ------------------ |
 | `POST /sync` with `resource_types=["workspaces"]` | Get workspace list |
 
 ---

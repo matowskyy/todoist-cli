@@ -43,8 +43,16 @@ describe('comment list', () => {
     mockApi.getTask.mockResolvedValue({ id: 'task-1', content: 'Buy milk' })
     mockApi.getComments.mockResolvedValue({
       results: [
-        { id: 'comment-1', content: 'Remember organic', postedAt: '2026-01-08T10:00:00Z' },
-        { id: 'comment-2', content: 'Got it', postedAt: '2026-01-09T14:00:00Z' },
+        {
+          id: 'comment-1',
+          content: 'Remember organic',
+          postedAt: '2026-01-08T10:00:00Z',
+        },
+        {
+          id: 'comment-2',
+          content: 'Got it',
+          postedAt: '2026-01-09T14:00:00Z',
+        },
       ],
       nextCursor: null,
     })
@@ -54,7 +62,9 @@ describe('comment list', () => {
     expect(mockApi.getComments).toHaveBeenCalledWith(
       expect.objectContaining({ taskId: 'task-1' })
     )
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Remember organic'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Remember organic')
+    )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Got it'))
     consoleSpy.mockRestore()
   })
@@ -78,11 +88,20 @@ describe('comment list', () => {
 
     mockApi.getTask.mockResolvedValue({ id: 'task-1', content: 'Test' })
     mockApi.getComments.mockResolvedValue({
-      results: [{ id: 'comment-1', content: 'Note', postedAt: '2026-01-08T10:00:00Z' }],
+      results: [
+        { id: 'comment-1', content: 'Note', postedAt: '2026-01-08T10:00:00Z' },
+      ],
       nextCursor: null,
     })
 
-    await program.parseAsync(['node', 'td', 'comment', 'list', 'id:task-1', '--json'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'comment',
+      'list',
+      'id:task-1',
+      '--json',
+    ])
 
     const output = consoleSpy.mock.calls[0][0]
     const parsed = JSON.parse(output)
@@ -124,11 +143,19 @@ describe('comment add', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     mockApi.getTask.mockResolvedValue({ id: 'task-1', content: 'Buy milk' })
-    mockApi.addComment.mockResolvedValue({ id: 'comment-new', content: 'Get 2%' })
+    mockApi.addComment.mockResolvedValue({
+      id: 'comment-new',
+      content: 'Get 2%',
+    })
 
     await program.parseAsync([
-      'node', 'td', 'comment', 'add', 'id:task-1',
-      '--content', 'Get 2%',
+      'node',
+      'td',
+      'comment',
+      'add',
+      'id:task-1',
+      '--content',
+      'Get 2%',
     ])
 
     expect(mockApi.addComment).toHaveBeenCalledWith({
@@ -144,14 +171,24 @@ describe('comment add', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     mockApi.getTask.mockResolvedValue({ id: 'task-1', content: 'Test' })
-    mockApi.addComment.mockResolvedValue({ id: 'comment-xyz', content: 'Note' })
+    mockApi.addComment.mockResolvedValue({
+      id: 'comment-xyz',
+      content: 'Note',
+    })
 
     await program.parseAsync([
-      'node', 'td', 'comment', 'add', 'id:task-1',
-      '--content', 'Note',
+      'node',
+      'td',
+      'comment',
+      'add',
+      'id:task-1',
+      '--content',
+      'Note',
     ])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('comment-xyz'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('comment-xyz')
+    )
     consoleSpy.mockRestore()
   })
 })
@@ -169,7 +206,14 @@ describe('comment delete', () => {
     const program = createProgram()
 
     await expect(
-      program.parseAsync(['node', 'td', 'comment', 'delete', 'comment-1', '--yes'])
+      program.parseAsync([
+        'node',
+        'td',
+        'comment',
+        'delete',
+        'comment-1',
+        '--yes',
+      ])
     ).rejects.toThrow('INVALID_REF')
   })
 
@@ -187,7 +231,14 @@ describe('comment delete', () => {
 
     mockApi.deleteComment.mockResolvedValue(undefined)
 
-    await program.parseAsync(['node', 'td', 'comment', 'delete', 'id:comment-123', '--yes'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'comment',
+      'delete',
+      'id:comment-123',
+      '--yes',
+    ])
 
     expect(mockApi.deleteComment).toHaveBeenCalledWith('comment-123')
     expect(consoleSpy).toHaveBeenCalledWith('Deleted comment comment-123')

@@ -12,7 +12,9 @@ const mockGetApi = vi.mocked(getApi)
 
 function createMockApi() {
   return {
-    getCompletedTasksByCompletionDate: vi.fn().mockResolvedValue({ items: [], nextCursor: null }),
+    getCompletedTasksByCompletionDate: vi
+      .fn()
+      .mockResolvedValue({ items: [], nextCursor: null }),
     getProjects: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
   }
 }
@@ -55,7 +57,12 @@ describe('completed command', () => {
 
     mockApi.getCompletedTasksByCompletionDate.mockResolvedValue({
       items: [
-        { id: 'task-1', content: 'Completed task', projectId: 'proj-1', priority: 1 },
+        {
+          id: 'task-1',
+          content: 'Completed task',
+          projectId: 'proj-1',
+          priority: 1,
+        },
       ],
       nextCursor: null,
     })
@@ -66,8 +73,12 @@ describe('completed command', () => {
 
     await program.parseAsync(['node', 'td', 'completed'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Completed'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Completed task'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Completed')
+    )
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Completed task')
+    )
   })
 
   it('uses today as default since date', async () => {
@@ -86,7 +97,15 @@ describe('completed command', () => {
   it('accepts custom date range', async () => {
     const program = createProgram()
 
-    await program.parseAsync(['node', 'td', 'completed', '--since', '2024-01-01', '--until', '2024-01-08'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'completed',
+      '--since',
+      '2024-01-01',
+      '--until',
+      '2024-01-08',
+    ])
 
     expect(mockApi.getCompletedTasksByCompletionDate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -99,11 +118,16 @@ describe('completed command', () => {
   it('shows "No completed tasks" when empty', async () => {
     const program = createProgram()
 
-    mockApi.getCompletedTasksByCompletionDate.mockResolvedValue({ items: [], nextCursor: null })
+    mockApi.getCompletedTasksByCompletionDate.mockResolvedValue({
+      items: [],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'completed'])
 
-    expect(consoleSpy).toHaveBeenCalledWith('No completed tasks in this period.')
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'No completed tasks in this period.'
+    )
   })
 
   it('filters by project', async () => {
@@ -113,7 +137,10 @@ describe('completed command', () => {
       results: [{ id: 'proj-1', name: 'Work' }],
       nextCursor: null,
     })
-    mockApi.getCompletedTasksByCompletionDate.mockResolvedValue({ items: [], nextCursor: null })
+    mockApi.getCompletedTasksByCompletionDate.mockResolvedValue({
+      items: [],
+      nextCursor: null,
+    })
 
     await program.parseAsync(['node', 'td', 'completed', '--project', 'Work'])
 
@@ -128,9 +155,7 @@ describe('completed command', () => {
     const program = createProgram()
 
     mockApi.getCompletedTasksByCompletionDate.mockResolvedValue({
-      items: [
-        { id: 'task-1', content: 'Done task', projectId: 'proj-1' },
-      ],
+      items: [{ id: 'task-1', content: 'Done task', projectId: 'proj-1' }],
       nextCursor: null,
     })
 

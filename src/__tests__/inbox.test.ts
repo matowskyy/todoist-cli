@@ -46,7 +46,10 @@ describe('inbox command', () => {
   it('fetches user to get inboxProjectId', async () => {
     const program = createProgram()
 
-    mockApi.getUser.mockResolvedValue({ id: 'user-1', inboxProjectId: 'inbox-proj' })
+    mockApi.getUser.mockResolvedValue({
+      id: 'user-1',
+      inboxProjectId: 'inbox-proj',
+    })
     mockApi.getProject.mockResolvedValue({ id: 'inbox-proj', name: 'Inbox' })
 
     await program.parseAsync(['node', 'td', 'inbox'])
@@ -57,7 +60,10 @@ describe('inbox command', () => {
   it('lists tasks for inbox project', async () => {
     const program = createProgram()
 
-    mockApi.getUser.mockResolvedValue({ id: 'user-1', inboxProjectId: 'inbox-proj' })
+    mockApi.getUser.mockResolvedValue({
+      id: 'user-1',
+      inboxProjectId: 'inbox-proj',
+    })
     mockApi.getProject.mockResolvedValue({ id: 'inbox-proj', name: 'Inbox' })
     mockApi.getTasks.mockResolvedValue({
       results: [
@@ -76,7 +82,10 @@ describe('inbox command', () => {
   it('outputs JSON when --json flag', async () => {
     const program = createProgram()
 
-    mockApi.getUser.mockResolvedValue({ id: 'user-1', inboxProjectId: 'inbox-proj' })
+    mockApi.getUser.mockResolvedValue({
+      id: 'user-1',
+      inboxProjectId: 'inbox-proj',
+    })
     mockApi.getTasks.mockResolvedValue({
       results: [{ id: 'task-1', content: 'Test', projectId: 'inbox-proj' }],
       nextCursor: null,
@@ -92,7 +101,10 @@ describe('inbox command', () => {
   it('passes priority filter through', async () => {
     const program = createProgram()
 
-    mockApi.getUser.mockResolvedValue({ id: 'user-1', inboxProjectId: 'inbox-proj' })
+    mockApi.getUser.mockResolvedValue({
+      id: 'user-1',
+      inboxProjectId: 'inbox-proj',
+    })
     mockApi.getProject.mockResolvedValue({ id: 'inbox-proj', name: 'Inbox' })
     mockApi.getTasks.mockResolvedValue({
       results: [

@@ -70,7 +70,9 @@ describe('label list', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     mockApi.getLabels.mockResolvedValue({
-      results: [{ id: 'label-1', name: 'urgent', color: 'red', isFavorite: true }],
+      results: [
+        { id: 'label-1', name: 'urgent', color: 'red', isFavorite: true },
+      ],
       nextCursor: null,
     })
 
@@ -119,7 +121,14 @@ describe('label create', () => {
 
     mockApi.addLabel.mockResolvedValue({ id: 'label-new', name: 'work' })
 
-    await program.parseAsync(['node', 'td', 'label', 'create', '--name', 'work'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'create',
+      '--name',
+      'work',
+    ])
 
     expect(mockApi.addLabel).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'work' })
@@ -132,9 +141,22 @@ describe('label create', () => {
     const program = createProgram()
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-    mockApi.addLabel.mockResolvedValue({ id: 'label-new', name: 'urgent', color: 'red' })
+    mockApi.addLabel.mockResolvedValue({
+      id: 'label-new',
+      name: 'urgent',
+      color: 'red',
+    })
 
-    await program.parseAsync(['node', 'td', 'label', 'create', '--name', 'urgent', '--color', 'red'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'create',
+      '--name',
+      'urgent',
+      '--color',
+      'red',
+    ])
 
     expect(mockApi.addLabel).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'urgent', color: 'red' })
@@ -146,9 +168,21 @@ describe('label create', () => {
     const program = createProgram()
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-    mockApi.addLabel.mockResolvedValue({ id: 'label-new', name: 'important', isFavorite: true })
+    mockApi.addLabel.mockResolvedValue({
+      id: 'label-new',
+      name: 'important',
+      isFavorite: true,
+    })
 
-    await program.parseAsync(['node', 'td', 'label', 'create', '--name', 'important', '--favorite'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'create',
+      '--name',
+      'important',
+      '--favorite',
+    ])
 
     expect(mockApi.addLabel).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'important', isFavorite: true })
@@ -162,9 +196,18 @@ describe('label create', () => {
 
     mockApi.addLabel.mockResolvedValue({ id: 'label-xyz', name: 'test' })
 
-    await program.parseAsync(['node', 'td', 'label', 'create', '--name', 'test'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'create',
+      '--name',
+      'test',
+    ])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('label-xyz'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('label-xyz')
+    )
     consoleSpy.mockRestore()
   })
 })
@@ -201,7 +244,14 @@ describe('label delete', () => {
     })
     mockApi.deleteLabel.mockResolvedValue(undefined)
 
-    await program.parseAsync(['node', 'td', 'label', 'delete', 'urgent', '--yes'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'delete',
+      'urgent',
+      '--yes',
+    ])
 
     expect(mockApi.deleteLabel).toHaveBeenCalledWith('label-1')
     expect(consoleSpy).toHaveBeenCalledWith('Deleted: @urgent')
@@ -215,7 +265,14 @@ describe('label delete', () => {
     mockApi.getLabels.mockResolvedValue({ results: [], nextCursor: null })
     mockApi.deleteLabel.mockResolvedValue(undefined)
 
-    await program.parseAsync(['node', 'td', 'label', 'delete', 'id:label-123', '--yes'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'delete',
+      'id:label-123',
+      '--yes',
+    ])
 
     expect(mockApi.deleteLabel).toHaveBeenCalledWith('label-123')
     consoleSpy.mockRestore()
@@ -231,7 +288,14 @@ describe('label delete', () => {
     })
     mockApi.deleteLabel.mockResolvedValue(undefined)
 
-    await program.parseAsync(['node', 'td', 'label', 'delete', '@home', '--yes'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'delete',
+      '@home',
+      '--yes',
+    ])
 
     expect(mockApi.deleteLabel).toHaveBeenCalledWith('label-1')
     consoleSpy.mockRestore()
@@ -243,7 +307,14 @@ describe('label delete', () => {
     mockApi.getLabels.mockResolvedValue({ results: [], nextCursor: null })
 
     await expect(
-      program.parseAsync(['node', 'td', 'label', 'delete', 'nonexistent', '--yes'])
+      program.parseAsync([
+        'node',
+        'td',
+        'label',
+        'delete',
+        'nonexistent',
+        '--yes',
+      ])
     ).rejects.toThrow('LABEL_NOT_FOUND')
   })
 })

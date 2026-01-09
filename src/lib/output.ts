@@ -3,10 +3,10 @@ import type { Task } from '@doist/todoist-api-typescript'
 import type { Project } from './api.js'
 
 const PRIORITY_COLORS: Record<number, (s: string) => string> = {
-  4: chalk.red,     // p1 = priority 4 in API (highest)
-  3: chalk.yellow,  // p2
-  2: chalk.blue,    // p3
-  1: chalk.gray,    // p4 (lowest/none)
+  4: chalk.red, // p1 = priority 4 in API (highest)
+  3: chalk.yellow, // p2
+  2: chalk.blue, // p3
+  1: chalk.gray, // p4 (lowest/none)
 }
 
 const PRIORITY_LABELS: Record<number, string> = {
@@ -27,7 +27,11 @@ export function formatDue(due: Task['due'] | undefined): string {
   return due.string || due.date
 }
 
-export function formatTaskRow(task: Task, projectName?: string, assignee?: string): string {
+export function formatTaskRow(
+  task: Task,
+  projectName?: string,
+  assignee?: string
+): string {
   const line1 = '  ' + task.content
   const metaParts = [chalk.dim(`id:${task.id}`), formatPriority(task.priority)]
   const due = formatDue(task.due)
@@ -38,7 +42,11 @@ export function formatTaskRow(task: Task, projectName?: string, assignee?: strin
   return `${line1}\n${line2}`
 }
 
-export function formatTaskView(task: Task, project?: Project, full = false): string {
+export function formatTaskView(
+  task: Task,
+  project?: Project,
+  full = false
+): string {
   const lines: string[] = []
 
   lines.push(`${chalk.bold(task.content)}`)
@@ -77,17 +85,54 @@ export function formatTaskView(task: Task, project?: Project, full = false): str
 
 type FieldPicker<T> = (item: T) => Partial<T>
 
-const TASK_ESSENTIAL_FIELDS = ['id', 'content', 'description', 'priority', 'due', 'projectId', 'sectionId', 'parentId', 'labels', 'url', 'responsibleUid'] as const
-const PROJECT_ESSENTIAL_FIELDS = ['id', 'name', 'color', 'isFavorite', 'parentId', 'viewStyle', 'url'] as const
+const TASK_ESSENTIAL_FIELDS = [
+  'id',
+  'content',
+  'description',
+  'priority',
+  'due',
+  'projectId',
+  'sectionId',
+  'parentId',
+  'labels',
+  'url',
+  'responsibleUid',
+] as const
+const PROJECT_ESSENTIAL_FIELDS = [
+  'id',
+  'name',
+  'color',
+  'isFavorite',
+  'parentId',
+  'viewStyle',
+  'url',
+] as const
 const LABEL_ESSENTIAL_FIELDS = ['id', 'name', 'color', 'isFavorite'] as const
-const SECTION_ESSENTIAL_FIELDS = ['id', 'name', 'projectId', 'sectionOrder', 'url'] as const
-const COMMENT_ESSENTIAL_FIELDS = ['id', 'content', 'postedAt', 'taskId', 'projectId'] as const
+const SECTION_ESSENTIAL_FIELDS = [
+  'id',
+  'name',
+  'projectId',
+  'sectionOrder',
+  'url',
+] as const
+const COMMENT_ESSENTIAL_FIELDS = [
+  'id',
+  'content',
+  'postedAt',
+  'taskId',
+  'projectId',
+] as const
 
-function pickFields<T extends object>(item: T, fields: readonly string[]): Partial<T> {
+function pickFields<T extends object>(
+  item: T,
+  fields: readonly string[]
+): Partial<T> {
   const result: Partial<T> = {}
   for (const field of fields) {
     if (field in item) {
-      (result as Record<string, unknown>)[field] = (item as Record<string, unknown>)[field]
+      ;(result as Record<string, unknown>)[field] = (
+        item as Record<string, unknown>
+      )[field]
     }
   }
   return result
@@ -97,34 +142,57 @@ export type EntityType = 'task' | 'project' | 'label' | 'section' | 'comment'
 
 function getEssentialFields(type: EntityType): readonly string[] {
   switch (type) {
-    case 'task': return TASK_ESSENTIAL_FIELDS
-    case 'project': return PROJECT_ESSENTIAL_FIELDS
-    case 'label': return LABEL_ESSENTIAL_FIELDS
-    case 'section': return SECTION_ESSENTIAL_FIELDS
-    case 'comment': return COMMENT_ESSENTIAL_FIELDS
+    case 'task':
+      return TASK_ESSENTIAL_FIELDS
+    case 'project':
+      return PROJECT_ESSENTIAL_FIELDS
+    case 'label':
+      return LABEL_ESSENTIAL_FIELDS
+    case 'section':
+      return SECTION_ESSENTIAL_FIELDS
+    case 'comment':
+      return COMMENT_ESSENTIAL_FIELDS
   }
 }
 
-export function formatJson<T extends object>(data: T | T[], type?: EntityType, full = false): string {
+export function formatJson<T extends object>(
+  data: T | T[],
+  type?: EntityType,
+  full = false
+): string {
   if (full || !type) {
     return JSON.stringify(data, null, 2)
   }
   const fields = getEssentialFields(type)
   if (Array.isArray(data)) {
-    return JSON.stringify(data.map((item) => pickFields(item, fields)), null, 2)
+    return JSON.stringify(
+      data.map((item) => pickFields(item, fields)),
+      null,
+      2
+    )
   }
   return JSON.stringify(pickFields(data, fields), null, 2)
 }
 
-export function formatNdjson<T extends object>(items: T[], type?: EntityType, full = false): string {
+export function formatNdjson<T extends object>(
+  items: T[],
+  type?: EntityType,
+  full = false
+): string {
   if (full || !type) {
     return items.map((item) => JSON.stringify(item)).join('\n')
   }
   const fields = getEssentialFields(type)
-  return items.map((item) => JSON.stringify(pickFields(item, fields))).join('\n')
+  return items
+    .map((item) => JSON.stringify(pickFields(item, fields)))
+    .join('\n')
 }
 
-export function formatError(code: string, message: string, hints?: string[]): string {
+export function formatError(
+  code: string,
+  message: string,
+  hints?: string[]
+): string {
   const lines = [`Error: ${code}`, message]
   if (hints && hints.length > 0) {
     lines.push('')

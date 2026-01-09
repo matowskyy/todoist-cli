@@ -1,6 +1,11 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
-import { formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
+import {
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+  formatError,
+} from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { isIdRef, extractId } from '../lib/refs.js'
 import chalk from 'chalk'
@@ -28,12 +33,24 @@ async function listLabels(options: ListOptions): Promise<void> {
   )
 
   if (options.json) {
-    console.log(formatPaginatedJson({ results: labels, nextCursor }, 'label', options.full))
+    console.log(
+      formatPaginatedJson(
+        { results: labels, nextCursor },
+        'label',
+        options.full
+      )
+    )
     return
   }
 
   if (options.ndjson) {
-    console.log(formatPaginatedNdjson({ results: labels, nextCursor }, 'label', options.full))
+    console.log(
+      formatPaginatedNdjson(
+        { results: labels, nextCursor },
+        'label',
+        options.full
+      )
+    )
     return
   }
 
@@ -44,7 +61,9 @@ async function listLabels(options: ListOptions): Promise<void> {
 
   for (const label of labels) {
     const id = chalk.dim(label.id)
-    const name = label.isFavorite ? chalk.yellow(`@${label.name}`) : `@${label.name}`
+    const name = label.isFavorite
+      ? chalk.yellow(`@${label.name}`)
+      : `@${label.name}`
     console.log(`${id}  ${name}`)
   }
   console.log(formatNextCursorFooter(nextCursor))
@@ -69,7 +88,10 @@ async function createLabel(options: CreateOptions): Promise<void> {
   console.log(chalk.dim(`ID: ${label.id}`))
 }
 
-async function deleteLabel(nameOrId: string, options: { yes?: boolean }): Promise<void> {
+async function deleteLabel(
+  nameOrId: string,
+  options: { yes?: boolean }
+): Promise<void> {
   if (!options.yes) {
     throw new Error(
       formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.')
@@ -85,9 +107,13 @@ async function deleteLabel(nameOrId: string, options: { yes?: boolean }): Promis
     labelId = extractId(nameOrId)
   } else {
     const name = nameOrId.startsWith('@') ? nameOrId.slice(1) : nameOrId
-    const label = labels.find((l) => l.name.toLowerCase() === name.toLowerCase())
+    const label = labels.find(
+      (l) => l.name.toLowerCase() === name.toLowerCase()
+    )
     if (!label) {
-      throw new Error(formatError('LABEL_NOT_FOUND', `Label "${nameOrId}" not found.`))
+      throw new Error(
+        formatError('LABEL_NOT_FOUND', `Label "${nameOrId}" not found.`)
+      )
     }
     labelId = label.id
   }

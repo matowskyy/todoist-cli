@@ -14,11 +14,9 @@ export function extractId(ref: string): string {
 export function requireIdRef(ref: string, entityName: string): string {
   if (!isIdRef(ref)) {
     throw new Error(
-      formatError(
-        'INVALID_REF',
-        `Invalid ${entityName} reference "${ref}".`,
-        [`Use id:xxx format (e.g., id:${ref})`]
-      )
+      formatError('INVALID_REF', `Invalid ${entityName} reference "${ref}".`, [
+        `Use id:xxx format (e.g., id:${ref})`,
+      ])
     )
   }
   return extractId(ref)
@@ -41,7 +39,9 @@ async function resolveRef<T extends { id: string }>(
   const exact = results.find((item) => getName(item).toLowerCase() === lower)
   if (exact) return exact
 
-  const partial = results.filter((item) => getName(item).toLowerCase().includes(lower))
+  const partial = results.filter((item) =>
+    getName(item).toLowerCase().includes(lower)
+  )
   if (partial.length === 1) return partial[0]
   if (partial.length > 1) {
     throw new Error(
@@ -54,11 +54,17 @@ async function resolveRef<T extends { id: string }>(
   }
 
   throw new Error(
-    formatError(`${entityType.toUpperCase()}_NOT_FOUND`, `${entityType} "${ref}" not found.`)
+    formatError(
+      `${entityType.toUpperCase()}_NOT_FOUND`,
+      `${entityType} "${ref}" not found.`
+    )
   )
 }
 
-export async function resolveTaskRef(api: TodoistApi, ref: string): Promise<Task> {
+export async function resolveTaskRef(
+  api: TodoistApi,
+  ref: string
+): Promise<Task> {
   return resolveRef(
     ref,
     (id) => api.getTask(id),
@@ -68,7 +74,10 @@ export async function resolveTaskRef(api: TodoistApi, ref: string): Promise<Task
   )
 }
 
-export async function resolveProjectRef(api: TodoistApi, ref: string): Promise<Project> {
+export async function resolveProjectRef(
+  api: TodoistApi,
+  ref: string
+): Promise<Project> {
   return resolveRef(
     ref,
     (id) => api.getProject(id),
@@ -78,7 +87,10 @@ export async function resolveProjectRef(api: TodoistApi, ref: string): Promise<P
   )
 }
 
-export async function resolveProjectId(api: TodoistApi, ref: string): Promise<string> {
+export async function resolveProjectId(
+  api: TodoistApi,
+  ref: string
+): Promise<string> {
   const project = await resolveProjectRef(api, ref)
   return project.id
 }
@@ -142,7 +154,9 @@ export async function resolveParentTaskId(
     const exact = sectionTasks.find((t) => t.content.toLowerCase() === lower)
     if (exact) return exact.id
 
-    const partial = sectionTasks.filter((t) => t.content.toLowerCase().includes(lower))
+    const partial = sectionTasks.filter((t) =>
+      t.content.toLowerCase().includes(lower)
+    )
     if (partial.length === 1) return partial[0].id
     if (partial.length > 1) {
       throw new Error(
@@ -159,7 +173,9 @@ export async function resolveParentTaskId(
   const exact = projectTasks.find((t) => t.content.toLowerCase() === lower)
   if (exact) return exact.id
 
-  const partial = projectTasks.filter((t) => t.content.toLowerCase().includes(lower))
+  const partial = projectTasks.filter((t) =>
+    t.content.toLowerCase().includes(lower)
+  )
   if (partial.length === 1) return partial[0].id
   if (partial.length > 1) {
     throw new Error(
@@ -172,7 +188,10 @@ export async function resolveParentTaskId(
   }
 
   throw new Error(
-    formatError('PARENT_NOT_FOUND', `Parent task "${ref}" not found in project.`)
+    formatError(
+      'PARENT_NOT_FOUND',
+      `Parent task "${ref}" not found in project.`
+    )
   )
 }
 
@@ -183,7 +202,9 @@ export async function resolveWorkspaceRef(ref: string): Promise<Workspace> {
     const id = extractId(ref)
     const workspace = workspaces.find((w) => w.id === id)
     if (!workspace) {
-      throw new Error(formatError('WORKSPACE_NOT_FOUND', `Workspace id:${id} not found.`))
+      throw new Error(
+        formatError('WORKSPACE_NOT_FOUND', `Workspace id:${id} not found.`)
+      )
     }
     return workspace
   }
@@ -204,5 +225,7 @@ export async function resolveWorkspaceRef(ref: string): Promise<Workspace> {
     )
   }
 
-  throw new Error(formatError('WORKSPACE_NOT_FOUND', `Workspace "${ref}" not found.`))
+  throw new Error(
+    formatError('WORKSPACE_NOT_FOUND', `Workspace "${ref}" not found.`)
+  )
 }

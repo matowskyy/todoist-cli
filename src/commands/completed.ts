@@ -1,6 +1,11 @@
 import { Command } from 'commander'
 import { getApi, type Project } from '../lib/api.js'
-import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter } from '../lib/output.js'
+import {
+  formatTaskRow,
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+} from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { resolveProjectId } from '../lib/refs.js'
 import chalk from 'chalk'
@@ -68,12 +73,24 @@ export function registerCompletedCommand(program: Command): void {
       )
 
       if (options.json) {
-        console.log(formatPaginatedJson({ results: tasks, nextCursor }, 'task', options.full))
+        console.log(
+          formatPaginatedJson(
+            { results: tasks, nextCursor },
+            'task',
+            options.full
+          )
+        )
         return
       }
 
       if (options.ndjson) {
-        console.log(formatPaginatedNdjson({ results: tasks, nextCursor }, 'task', options.full))
+        console.log(
+          formatPaginatedNdjson(
+            { results: tasks, nextCursor },
+            'task',
+            options.full
+          )
+        )
         return
       }
 
@@ -84,7 +101,9 @@ export function registerCompletedCommand(program: Command): void {
       }
 
       const { results: allProjects } = await api.getProjects()
-      const projects = new Map<string, Project>(allProjects.map((p) => [p.id, p]))
+      const projects = new Map<string, Project>(
+        allProjects.map((p) => [p.id, p])
+      )
 
       const dateRange = since === until ? since : `${since} to ${until}`
       console.log(chalk.bold(`Completed (${tasks.length}) - ${dateRange}`))

@@ -5,10 +5,11 @@ TypeScript CLI for Todoist. Binary name: `td`.
 ## Build & Run
 
 ```bash
-npm run build      # compile TypeScript
-npm run dev        # watch mode
-npm run lint       # type check only
-npm test           # run tests
+npm run build       # compile TypeScript
+npm run dev         # watch mode
+npm run type-check  # type check
+npm run format      # format code
+npm test            # run tests
 node dist/index.js # or just `td` if linked
 ```
 
@@ -53,6 +54,7 @@ Tests use vitest with mocked API. Run `npm test` before committing.
 ## Auth
 
 Token from `TODOIST_API_TOKEN` env var or `~/.config/todoist-cli/config.json`:
+
 ```json
 { "api_token": "your-api-token" }
 ```

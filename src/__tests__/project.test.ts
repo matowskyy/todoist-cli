@@ -110,7 +110,9 @@ describe('project list', () => {
 
     await program.parseAsync(['node', 'td', 'project', 'list'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('more items exist'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('more items exist')
+    )
   })
 })
 
@@ -133,7 +135,15 @@ describe('project view', () => {
     const program = createProgram()
 
     mockApi.getProjects.mockResolvedValue({
-      results: [{ id: 'proj-1', name: 'Work', color: 'blue', isFavorite: true, url: 'https://...' }],
+      results: [
+        {
+          id: 'proj-1',
+          name: 'Work',
+          color: 'blue',
+          isFavorite: true,
+          url: 'https://...',
+        },
+      ],
       nextCursor: null,
     })
     mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
@@ -176,7 +186,9 @@ describe('project view', () => {
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('ID:'))
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Color:'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Favorite:'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Favorite:')
+    )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('URL:'))
   })
 
@@ -200,7 +212,9 @@ describe('project view', () => {
 
     await program.parseAsync(['node', 'td', 'project', 'view', 'id:proj-1'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Tasks (2)'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Tasks (2)')
+    )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Task A'))
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Task B'))
   })
@@ -228,15 +242,25 @@ describe('project view', () => {
       folderId: 'folder-1',
     })
     mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
-    mockFetchWorkspaces.mockResolvedValue([{ id: 'ws-1', name: 'Acme Corp' } as any])
-    mockFetchWorkspaceFolders.mockResolvedValue([{ id: 'folder-1', name: 'Engineering', workspaceId: 'ws-1' }])
+    mockFetchWorkspaces.mockResolvedValue([
+      { id: 'ws-1', name: 'Acme Corp' } as any,
+    ])
+    mockFetchWorkspaceFolders.mockResolvedValue([
+      { id: 'folder-1', name: 'Engineering', workspaceId: 'ws-1' },
+    ])
 
     await program.parseAsync(['node', 'td', 'project', 'view', 'id:proj-1'])
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Workspace:'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Acme Corp'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Workspace:')
+    )
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Acme Corp')
+    )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Folder:'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Engineering'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Engineering')
+    )
   })
 
   it('shows shared status for shared personal project', async () => {
@@ -279,12 +303,19 @@ describe('project list grouping', () => {
 
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Work Project', isFavorite: false, workspaceId: 'ws-1' },
+        {
+          id: 'proj-1',
+          name: 'Work Project',
+          isFavorite: false,
+          workspaceId: 'ws-1',
+        },
         { id: 'proj-2', name: 'Personal', isFavorite: false },
       ],
       nextCursor: null,
     })
-    mockFetchWorkspaces.mockResolvedValue([{ id: 'ws-1', name: 'Acme Corp' } as any])
+    mockFetchWorkspaces.mockResolvedValue([
+      { id: 'ws-1', name: 'Acme Corp' } as any,
+    ])
 
     await program.parseAsync(['node', 'td', 'project', 'list'])
 
@@ -298,8 +329,18 @@ describe('project list grouping', () => {
 
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Shared Project', isFavorite: false, isShared: true },
-        { id: 'proj-2', name: 'Private Project', isFavorite: false, isShared: false },
+        {
+          id: 'proj-1',
+          name: 'Shared Project',
+          isFavorite: false,
+          isShared: true,
+        },
+        {
+          id: 'proj-2',
+          name: 'Private Project',
+          isFavorite: false,
+          isShared: false,
+        },
       ],
       nextCursor: null,
     })
@@ -307,8 +348,16 @@ describe('project list grouping', () => {
     await program.parseAsync(['node', 'td', 'project', 'list'])
 
     const calls = consoleSpy.mock.calls.map((c: unknown[]) => c[0] as string)
-    expect(calls.some((c: string) => c.includes('Shared Project') && c.includes('[shared]'))).toBe(true)
-    expect(calls.some((c: string) => c.includes('Private Project') && !c.includes('[shared]'))).toBe(true)
+    expect(
+      calls.some(
+        (c: string) => c.includes('Shared Project') && c.includes('[shared]')
+      )
+    ).toBe(true)
+    expect(
+      calls.some(
+        (c: string) => c.includes('Private Project') && !c.includes('[shared]')
+      )
+    ).toBe(true)
   })
 
   it('lists personal projects before workspace projects', async () => {
@@ -316,18 +365,27 @@ describe('project list grouping', () => {
 
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Work Project', isFavorite: false, workspaceId: 'ws-1' },
+        {
+          id: 'proj-1',
+          name: 'Work Project',
+          isFavorite: false,
+          workspaceId: 'ws-1',
+        },
         { id: 'proj-2', name: 'My Personal', isFavorite: false },
       ],
       nextCursor: null,
     })
-    mockFetchWorkspaces.mockResolvedValue([{ id: 'ws-1', name: 'Acme Corp' } as any])
+    mockFetchWorkspaces.mockResolvedValue([
+      { id: 'ws-1', name: 'Acme Corp' } as any,
+    ])
 
     await program.parseAsync(['node', 'td', 'project', 'list'])
 
     const calls = consoleSpy.mock.calls.map((c: unknown[]) => c[0] as string)
     const personalIndex = calls.findIndex((c: string) => c.includes('Personal'))
-    const workspaceIndex = calls.findIndex((c: string) => c.includes('Acme Corp'))
+    const workspaceIndex = calls.findIndex((c: string) =>
+      c.includes('Acme Corp')
+    )
     expect(personalIndex).toBeLessThan(workspaceIndex)
   })
 
@@ -336,8 +394,18 @@ describe('project list grouping', () => {
 
     mockApi.getProjects.mockResolvedValue({
       results: [
-        { id: 'proj-1', name: 'Zebra Project', isFavorite: false, workspaceId: 'ws-z' },
-        { id: 'proj-2', name: 'Alpha Project', isFavorite: false, workspaceId: 'ws-a' },
+        {
+          id: 'proj-1',
+          name: 'Zebra Project',
+          isFavorite: false,
+          workspaceId: 'ws-z',
+        },
+        {
+          id: 'proj-2',
+          name: 'Alpha Project',
+          isFavorite: false,
+          workspaceId: 'ws-a',
+        },
       ],
       nextCursor: null,
     })
@@ -360,7 +428,12 @@ describe('project list grouping', () => {
     mockApi.getProjects.mockResolvedValue({
       results: [
         { id: 'proj-1', name: 'Personal Project', isFavorite: false },
-        { id: 'proj-2', name: 'Workspace Project', isFavorite: false, workspaceId: 'ws-1' },
+        {
+          id: 'proj-2',
+          name: 'Workspace Project',
+          isFavorite: false,
+          workspaceId: 'ws-1',
+        },
       ],
       nextCursor: null,
     })
@@ -369,7 +442,9 @@ describe('project list grouping', () => {
 
     const calls = consoleSpy.mock.calls.map((c: unknown[]) => c[0] as string)
     expect(calls.some((c: string) => c.includes('Personal Project'))).toBe(true)
-    expect(calls.some((c: string) => c.includes('Workspace Project'))).toBe(false)
+    expect(calls.some((c: string) => c.includes('Workspace Project'))).toBe(
+      false
+    )
   })
 })
 
@@ -405,12 +480,23 @@ describe('project collaborators', () => {
     })
     mockApi.getWorkspaceUsers.mockResolvedValue({
       workspaceUsers: [
-        { userId: 'user-1', fullName: 'John Doe', userEmail: 'john@example.com', role: 'MEMBER' },
+        {
+          userId: 'user-1',
+          fullName: 'John Doe',
+          userEmail: 'john@example.com',
+          role: 'MEMBER',
+        },
       ],
       hasMore: false,
     })
 
-    await program.parseAsync(['node', 'td', 'project', 'collaborators', 'id:proj-1'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'collaborators',
+      'id:proj-1',
+    ])
 
     expect(mockApi.getWorkspaceUsers).toHaveBeenCalled()
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('John D.'))
@@ -431,7 +517,13 @@ describe('project collaborators', () => {
       nextCursor: null,
     })
 
-    await program.parseAsync(['node', 'td', 'project', 'collaborators', 'id:proj-1'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'collaborators',
+      'id:proj-1',
+    ])
 
     expect(mockApi.getProjectCollaborators).toHaveBeenCalled()
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Jane S.'))
@@ -447,7 +539,13 @@ describe('project collaborators', () => {
     })
 
     await expect(
-      program.parseAsync(['node', 'td', 'project', 'collaborators', 'id:proj-1'])
+      program.parseAsync([
+        'node',
+        'td',
+        'project',
+        'collaborators',
+        'id:proj-1',
+      ])
     ).rejects.toThrow('not shared')
   })
 })

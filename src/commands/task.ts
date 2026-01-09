@@ -9,7 +9,11 @@ import {
   resolveSectionId,
   resolveTaskRef,
 } from '../lib/refs.js'
-import { listTasksForProject, parsePriority, type TaskListOptions } from '../lib/task-list.js'
+import {
+  listTasksForProject,
+  parsePriority,
+  type TaskListOptions,
+} from '../lib/task-list.js'
 import { resolveAssigneeId } from '../lib/collaborators.js'
 
 interface ListOptions extends TaskListOptions {
@@ -74,7 +78,10 @@ async function uncompleteTask(ref: string): Promise<void> {
   console.log(`Reopened task ${id}`)
 }
 
-async function deleteTask(ref: string, options: { yes?: boolean }): Promise<void> {
+async function deleteTask(
+  ref: string,
+  options: { yes?: boolean }
+): Promise<void> {
   if (!options.yes) {
     throw new Error(
       formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.')
@@ -139,7 +146,10 @@ async function addTask(options: AddOptions): Promise<void> {
   if (options.assignee) {
     if (!project) {
       throw new Error(
-        formatError('PROJECT_REQUIRED', 'The --project flag is required when using --assignee.')
+        formatError(
+          'PROJECT_REQUIRED',
+          'The --project flag is required when using --assignee.'
+        )
       )
     }
     args.assigneeId = await resolveAssigneeId(api, options.assignee, project)
@@ -170,7 +180,8 @@ async function updateTask(ref: string, options: UpdateOptions): Promise<void> {
   if (options.content) args.content = options.content
   if (options.due) args.dueString = options.due
   if (options.priority) args.priority = parsePriority(options.priority)
-  if (options.labels) args.labels = options.labels.split(',').map((l) => l.trim())
+  if (options.labels)
+    args.labels = options.labels.split(',').map((l) => l.trim())
   if (options.description) args.description = options.description
 
   if (options.unassign) {
@@ -209,7 +220,11 @@ async function moveTask(ref: string, options: MoveOptions): Promise<void> {
 
   let targetSectionId: string | undefined
   if (options.section) {
-    targetSectionId = await resolveSectionId(api, options.section, targetProjectId)
+    targetSectionId = await resolveSectionId(
+      api,
+      options.section,
+      targetProjectId
+    )
   }
 
   if (options.parent) {
@@ -238,7 +253,10 @@ export function registerTaskCommand(program: Command): void {
     .option('--parent <ref>', 'Filter subtasks of a parent task')
     .option('--label <name>', 'Filter by label (comma-separated for multiple)')
     .option('--priority <p1-p4>', 'Filter by priority')
-    .option('--due <date>', 'Filter by due date (today, overdue, or YYYY-MM-DD)')
+    .option(
+      '--due <date>',
+      'Filter by due date (today, overdue, or YYYY-MM-DD)'
+    )
     .option('--filter <query>', 'Raw Todoist filter query')
     .option('--assignee <ref>', 'Filter by assignee (me or id:xxx)')
     .option('--unassigned', 'Show only unassigned tasks')

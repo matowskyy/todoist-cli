@@ -58,7 +58,9 @@ describe('section list', () => {
       expect.objectContaining({ projectId: 'proj-1' })
     )
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Planning'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('In Progress'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('In Progress')
+    )
     consoleSpy.mockRestore()
   })
 
@@ -85,7 +87,14 @@ describe('section list', () => {
       nextCursor: null,
     })
 
-    await program.parseAsync(['node', 'td', 'section', 'list', 'id:proj-1', '--json'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'section',
+      'list',
+      'id:proj-1',
+      '--json',
+    ])
 
     const output = consoleSpy.mock.calls[0][0]
     const parsed = JSON.parse(output)
@@ -115,9 +124,14 @@ describe('section create', () => {
     mockApi.addSection.mockResolvedValue({ id: 'sec-new', name: 'Review' })
 
     await program.parseAsync([
-      'node', 'td', 'section', 'create',
-      '--name', 'Review',
-      '--project', 'Work',
+      'node',
+      'td',
+      'section',
+      'create',
+      '--name',
+      'Review',
+      '--project',
+      'Work',
     ])
 
     expect(mockApi.addSection).toHaveBeenCalledWith({
@@ -136,9 +150,14 @@ describe('section create', () => {
     mockApi.addSection.mockResolvedValue({ id: 'sec-xyz', name: 'Test' })
 
     await program.parseAsync([
-      'node', 'td', 'section', 'create',
-      '--name', 'Test',
-      '--project', 'id:proj-1',
+      'node',
+      'td',
+      'section',
+      'create',
+      '--name',
+      'Test',
+      '--project',
+      'id:proj-1',
     ])
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('sec-xyz'))
@@ -159,7 +178,14 @@ describe('section delete', () => {
     const program = createProgram()
 
     await expect(
-      program.parseAsync(['node', 'td', 'section', 'delete', 'Planning', '--yes'])
+      program.parseAsync([
+        'node',
+        'td',
+        'section',
+        'delete',
+        'Planning',
+        '--yes',
+      ])
     ).rejects.toThrow('INVALID_REF')
   })
 
@@ -177,7 +203,14 @@ describe('section delete', () => {
 
     mockApi.deleteSection.mockResolvedValue(undefined)
 
-    await program.parseAsync(['node', 'td', 'section', 'delete', 'id:sec-123', '--yes'])
+    await program.parseAsync([
+      'node',
+      'td',
+      'section',
+      'delete',
+      'id:sec-123',
+      '--yes',
+    ])
 
     expect(mockApi.deleteSection).toHaveBeenCalledWith('sec-123')
     expect(consoleSpy).toHaveBeenCalledWith('Deleted section sec-123')

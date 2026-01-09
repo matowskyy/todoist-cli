@@ -1,6 +1,11 @@
 import { Command } from 'commander'
 import { getApi, getCurrentUserId } from '../lib/api.js'
-import { formatTaskRow, formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter } from '../lib/output.js'
+import {
+  formatTaskRow,
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+} from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { getLocalDate } from '../lib/dates.js'
 import { CollaboratorCache, formatAssignee } from '../lib/collaborators.js'
@@ -26,7 +31,10 @@ export function registerTodayCommand(program: Command): void {
     .option('--limit <n>', 'Limit number of results (default: 300)')
     .option('--cursor <cursor>', 'Continue from cursor')
     .option('--all', 'Fetch all results (no limit)')
-    .option('--any-assignee', 'Show tasks assigned to anyone (default: only me/unassigned)')
+    .option(
+      '--any-assignee',
+      'Show tasks assigned to anyone (default: only me/unassigned)'
+    )
     .option('--workspace <name>', 'Filter to tasks in workspace')
     .option('--personal', 'Filter to tasks in personal projects')
     .option('--json', 'Output as JSON')
@@ -57,7 +65,10 @@ export function registerTodayCommand(program: Command): void {
       }
 
       const filterResult = await filterByWorkspaceOrPersonal(
-        api, filteredTasks, options.workspace, options.personal
+        api,
+        filteredTasks,
+        options.workspace,
+        options.personal
       )
       filteredTasks = filterResult.tasks
 
@@ -66,12 +77,24 @@ export function registerTodayCommand(program: Command): void {
       const allTodayTasks = [...overdue, ...dueToday]
 
       if (options.json) {
-        console.log(formatPaginatedJson({ results: allTodayTasks, nextCursor }, 'task', options.full))
+        console.log(
+          formatPaginatedJson(
+            { results: allTodayTasks, nextCursor },
+            'task',
+            options.full
+          )
+        )
         return
       }
 
       if (options.ndjson) {
-        console.log(formatPaginatedNdjson({ results: allTodayTasks, nextCursor }, 'task', options.full))
+        console.log(
+          formatPaginatedNdjson(
+            { results: allTodayTasks, nextCursor },
+            'task',
+            options.full
+          )
+        )
         return
       }
 
@@ -88,16 +111,38 @@ export function registerTodayCommand(program: Command): void {
       if (overdue.length > 0) {
         console.log(chalk.red.bold(`Overdue (${overdue.length})`))
         for (const task of overdue) {
-          const assignee = formatAssignee(task.responsibleUid, task.projectId, projects, collaboratorCache)
-          console.log(formatTaskRow(task, projects.get(task.projectId)?.name, assignee ?? undefined))
+          const assignee = formatAssignee(
+            task.responsibleUid,
+            task.projectId,
+            projects,
+            collaboratorCache
+          )
+          console.log(
+            formatTaskRow(
+              task,
+              projects.get(task.projectId)?.name,
+              assignee ?? undefined
+            )
+          )
           console.log('')
         }
       }
 
       console.log(chalk.bold(`Today (${dueToday.length})`))
       for (const task of dueToday) {
-        const assignee = formatAssignee(task.responsibleUid, task.projectId, projects, collaboratorCache)
-        console.log(formatTaskRow(task, projects.get(task.projectId)?.name, assignee ?? undefined))
+        const assignee = formatAssignee(
+          task.responsibleUid,
+          task.projectId,
+          projects,
+          collaboratorCache
+        )
+        console.log(
+          formatTaskRow(
+            task,
+            projects.get(task.projectId)?.name,
+            assignee ?? undefined
+          )
+        )
         console.log('')
       }
       console.log(formatNextCursorFooter(nextCursor))

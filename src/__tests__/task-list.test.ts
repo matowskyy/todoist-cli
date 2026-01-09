@@ -103,22 +103,38 @@ describe('listTasksForProject', () => {
     const { listTasksForProject } = await import('../lib/task-list.js')
 
     const tasks = [
-      { id: 'task-1', content: 'High priority', priority: 4, projectId: 'proj-1' },
-      { id: 'task-2', content: 'Low priority', priority: 1, projectId: 'proj-1' },
+      {
+        id: 'task-1',
+        content: 'High priority',
+        priority: 4,
+        projectId: 'proj-1',
+      },
+      {
+        id: 'task-2',
+        content: 'Low priority',
+        priority: 1,
+        projectId: 'proj-1',
+      },
     ]
     mockApi.getTasks.mockResolvedValue({ results: tasks, nextCursor: null })
     mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'Work' })
 
     await listTasksForProject('proj-1', { priority: 'p1' })
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('High priority'))
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('Low priority'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('High priority')
+    )
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('Low priority')
+    )
   })
 
   it('outputs JSON when --json flag', async () => {
     const { listTasksForProject } = await import('../lib/task-list.js')
 
-    const tasks = [{ id: 'task-1', content: 'Test', priority: 1, projectId: 'proj-1' }]
+    const tasks = [
+      { id: 'task-1', content: 'Test', priority: 1, projectId: 'proj-1' },
+    ]
     mockApi.getTasks.mockResolvedValue({ results: tasks, nextCursor: null })
 
     await listTasksForProject('proj-1', { json: true })
@@ -151,8 +167,18 @@ describe('listTasksForProject', () => {
     const { listTasksForProject } = await import('../lib/task-list.js')
 
     const tasks = [
-      { id: 'task-1', content: 'In Planning', sectionId: 'sec-1', projectId: 'proj-1' },
-      { id: 'task-2', content: 'No section', sectionId: null, projectId: 'proj-1' },
+      {
+        id: 'task-1',
+        content: 'In Planning',
+        sectionId: 'sec-1',
+        projectId: 'proj-1',
+      },
+      {
+        id: 'task-2',
+        content: 'No section',
+        sectionId: null,
+        projectId: 'proj-1',
+      },
     ]
     mockApi.getTasks.mockResolvedValue({ results: tasks, nextCursor: null })
     mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'Work' })
@@ -163,7 +189,9 @@ describe('listTasksForProject', () => {
     await listTasksForProject('proj-1', {})
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Planning'))
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('no section'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('no section')
+    )
   })
 
   it('shows flat list when projectId is null', async () => {
@@ -207,6 +235,8 @@ describe('listTasksForProject', () => {
 
     await listTasksForProject('proj-1', {})
 
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('No tasks found'))
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('No tasks found')
+    )
   })
 })

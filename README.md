@@ -27,6 +27,7 @@ export TODOIST_API_TOKEN="your-token"
 ```
 
 Or create `~/.config/todoist-cli/config.json`:
+
 ```json
 { "api_token": "your-token" }
 ```
@@ -48,8 +49,9 @@ Run `td --help` or `td <command> --help` for more options.
 
 ```bash
 npm install
-npm run build    # compile
-npm run dev      # watch mode
-npm run lint     # type check
-npm test         # run tests
+npm run build       # compile
+npm run dev         # watch mode
+npm run type-check  # type check
+npm run format      # format code
+npm test            # run tests
 ```

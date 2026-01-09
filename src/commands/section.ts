@@ -1,6 +1,11 @@
 import { Command } from 'commander'
 import { getApi } from '../lib/api.js'
-import { formatPaginatedJson, formatPaginatedNdjson, formatNextCursorFooter, formatError } from '../lib/output.js'
+import {
+  formatPaginatedJson,
+  formatPaginatedNdjson,
+  formatNextCursorFooter,
+  formatError,
+} from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { requireIdRef, resolveProjectId } from '../lib/refs.js'
 import chalk from 'chalk'
@@ -13,7 +18,10 @@ interface ListOptions {
   full?: boolean
 }
 
-async function listSections(projectRef: string, options: ListOptions): Promise<void> {
+async function listSections(
+  projectRef: string,
+  options: ListOptions
+): Promise<void> {
   const api = await getApi()
   const projectId = await resolveProjectId(api, projectRef)
 
@@ -24,17 +32,30 @@ async function listSections(projectRef: string, options: ListOptions): Promise<v
       : LIMITS.sections
 
   const { results: sections, nextCursor } = await paginate(
-    (cursor, limit) => api.getSections({ projectId, cursor: cursor ?? undefined, limit }),
+    (cursor, limit) =>
+      api.getSections({ projectId, cursor: cursor ?? undefined, limit }),
     { limit: targetLimit }
   )
 
   if (options.json) {
-    console.log(formatPaginatedJson({ results: sections, nextCursor }, 'section', options.full))
+    console.log(
+      formatPaginatedJson(
+        { results: sections, nextCursor },
+        'section',
+        options.full
+      )
+    )
     return
   }
 
   if (options.ndjson) {
-    console.log(formatPaginatedNdjson({ results: sections, nextCursor }, 'section', options.full))
+    console.log(
+      formatPaginatedNdjson(
+        { results: sections, nextCursor },
+        'section',
+        options.full
+      )
+    )
     return
   }
 
@@ -68,9 +89,14 @@ async function createSection(options: CreateOptions): Promise<void> {
   console.log(chalk.dim(`ID: ${section.id}`))
 }
 
-async function deleteSection(sectionId: string, options: { yes?: boolean }): Promise<void> {
+async function deleteSection(
+  sectionId: string,
+  options: { yes?: boolean }
+): Promise<void> {
   if (!options.yes) {
-    throw new Error(formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.'))
+    throw new Error(
+      formatError('CONFIRMATION_REQUIRED', 'Use --yes to confirm deletion.')
+    )
   }
 
   const api = await getApi()
@@ -80,7 +106,9 @@ async function deleteSection(sectionId: string, options: { yes?: boolean }): Pro
 }
 
 export function registerSectionCommand(program: Command): void {
-  const section = program.command('section').description('Manage project sections')
+  const section = program
+    .command('section')
+    .description('Manage project sections')
 
   section
     .command('list <project>')
