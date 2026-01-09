@@ -8,6 +8,7 @@ TypeScript CLI for Todoist. Binary name: `td`.
 npm run build      # compile TypeScript
 npm run dev        # watch mode
 npm run lint       # type check only
+npm test           # run tests
 node dist/index.js # or just `td` if linked
 ```
 
@@ -40,9 +41,18 @@ src/
 - **Priority mapping**: API uses 4=p1 (highest), 1=p4 (lowest)
 - **Command registration**: Each command exports `registerXxxCommand(program: Command)` function
 
+## Testing
+
+Tests use vitest with mocked API. Run `npm test` before committing.
+
+- All commands and lib modules have tests in `src/__tests__/`
+- Shared mock factory in `helpers/mock-api.ts`, fixtures in `helpers/fixtures.ts`
+- When adding features, add corresponding tests
+- Pattern: mock `getApi`, use `program.parseAsync()` to test commands
+
 ## Auth
 
 Token from `TODOIST_API_TOKEN` env var or `~/.config/todoist-cli/config.json`:
 ```json
-{ "token": "your-api-token" }
+{ "api_token": "your-api-token" }
 ```

@@ -28,7 +28,7 @@ export TODOIST_API_TOKEN="your-token"
 
 Or create `~/.config/todoist-cli/config.json`:
 ```json
-{ "token": "your-token" }
+{ "api_token": "your-token" }
 ```
 
 ## Usage
@@ -51,4 +51,5 @@ npm install
 npm run build    # compile
 npm run dev      # watch mode
 npm run lint     # type check
+npm test         # run tests
 ```

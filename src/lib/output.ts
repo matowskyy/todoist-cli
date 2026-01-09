@@ -22,7 +22,7 @@ export function formatPriority(priority: number): string {
   return colorFn(label)
 }
 
-export function formatDue(due: Task['due']): string {
+export function formatDue(due: Task['due'] | undefined): string {
   if (!due) return ''
   return due.string || due.date
 }
