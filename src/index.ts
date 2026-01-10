@@ -14,6 +14,7 @@ import { registerSectionCommand } from './commands/section.js'
 import { registerWorkspaceCommand } from './commands/workspace.js'
 import { registerActivityCommand } from './commands/activity.js'
 import { registerReminderCommand } from './commands/reminder.js'
+import { registerSettingsCommand } from './commands/settings.js'
 
 program
   .name('td')
@@ -40,5 +41,9 @@ registerSectionCommand(program)
 registerWorkspaceCommand(program)
 registerActivityCommand(program)
 registerReminderCommand(program)
+registerSettingsCommand(program)
 
-program.parse()
+program.parseAsync().catch((err: Error) => {
+  console.error(err.message)
+  process.exit(1)
+})

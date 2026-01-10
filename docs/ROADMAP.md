@@ -17,7 +17,6 @@ Features not yet implemented, organized by priority.
 | Templates           | Sync API  | Import/export project templates |
 | Backups             | Sync API  | List and download backups       |
 | File uploads        | Sync API  | Attach files to comments        |
-| User settings       | Sync API  | View/update preferences         |
 | Karma/stats         | Sync API  | Productivity tracking           |
 | Webhooks            | REST/Sync | Create webhook subscriptions    |
 | Comment attachments | REST API  | File attachments on comments    |
