@@ -50,6 +50,7 @@ export function formatTaskRow(
       chalk.yellow(formatDuration(task.duration.amount, task.duration.unit))
     )
   }
+  if (task.deadline) metaParts.push(chalk.red(task.deadline.date))
   if (projectName) metaParts.push(chalk.cyan(projectName))
   if (assignee) metaParts.push(chalk.magenta(assignee))
   const line2 = '  ' + metaParts.join('  ')
@@ -80,6 +81,10 @@ export function formatTaskView(
     lines.push(
       `Duration: ${formatDuration(task.duration.amount, task.duration.unit)}`
     )
+  }
+
+  if (task.deadline) {
+    lines.push(`Deadline: ${task.deadline.date}`)
   }
 
   if (task.labels.length > 0) {
@@ -114,6 +119,7 @@ const TASK_ESSENTIAL_FIELDS = [
   'description',
   'priority',
   'due',
+  'deadline',
   'duration',
   'projectId',
   'sectionId',

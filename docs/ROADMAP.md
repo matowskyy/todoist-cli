@@ -7,7 +7,6 @@ Features not yet implemented, organized by priority.
 | Feature          | API      | Notes                                 |
 | ---------------- | -------- | ------------------------------------- |
 | Filters          | Sync API | Custom saved filter views             |
-| Task deadline    | REST API | `deadline_date` separate from due     |
 | Shared labels    | REST API | List/rename/remove shared labels      |
 | Comment update   | REST API | Edit existing comments                |
 | Project comments | REST API | Comments on projects (not just tasks) |

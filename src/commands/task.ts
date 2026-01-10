@@ -127,6 +127,7 @@ async function deleteTask(
 interface AddOptions {
   content: string
   due?: string
+  deadline?: string
   priority?: string
   project?: string
   section?: string
@@ -146,6 +147,10 @@ async function addTask(options: AddOptions): Promise<void> {
 
   if (options.due) {
     args.dueString = options.due
+  }
+
+  if (options.deadline) {
+    args.deadlineDate = options.deadline
   }
 
   if (options.priority) {
@@ -193,12 +198,14 @@ async function addTask(options: AddOptions): Promise<void> {
   const task = await api.addTask(args)
   console.log(`Created: ${task.content}`)
   if (task.due) console.log(`Due: ${task.due.string || task.due.date}`)
+  if (task.deadline) console.log(`Deadline: ${task.deadline.date}`)
   console.log(`ID: ${task.id}`)
 }
 
 interface UpdateOptions {
   content?: string
   due?: string
+  deadline?: string | false
   priority?: string
   labels?: string
   description?: string
@@ -215,6 +222,11 @@ async function updateTask(ref: string, options: UpdateOptions): Promise<void> {
 
   if (options.content) args.content = options.content
   if (options.due) args.dueString = options.due
+  if (options.deadline === false) {
+    args.deadlineDate = null
+  } else if (options.deadline) {
+    args.deadlineDate = options.deadline
+  }
   if (options.priority) args.priority = parsePriority(options.priority)
   if (options.labels)
     args.labels = options.labels.split(',').map((l) => l.trim())
@@ -338,6 +350,7 @@ export function registerTaskCommand(program: Command): void {
     .description('Add a task with explicit flags')
     .requiredOption('--content <text>', 'Task content')
     .option('--due <date>', 'Due date (natural language or YYYY-MM-DD)')
+    .option('--deadline <date>', 'Deadline date (YYYY-MM-DD)')
     .option('--priority <p1-p4>', 'Priority level')
     .option('--project <name>', 'Project name or id:xxx')
     .option('--section <id>', 'Section ID')
@@ -353,6 +366,8 @@ export function registerTaskCommand(program: Command): void {
     .description('Update a task')
     .option('--content <text>', 'New content')
     .option('--due <date>', 'New due date')
+    .option('--deadline <date>', 'Deadline date (YYYY-MM-DD)')
+    .option('--no-deadline', 'Remove deadline')
     .option('--priority <p1-p4>', 'New priority')
     .option('--labels <a,b>', 'New labels (replaces existing)')
     .option('--description <text>', 'New description')

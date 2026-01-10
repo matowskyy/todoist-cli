@@ -1324,3 +1324,136 @@ describe('task update --assignee', () => {
     consoleSpy.mockRestore()
   })
 })
+
+describe('task add --deadline', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+  })
+
+  it('creates task with deadline', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.addTask.mockResolvedValue({
+      id: 'task-new',
+      content: 'Task',
+      due: null,
+      deadline: { date: '2026-06-15', lang: 'en' },
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'task',
+      'add',
+      '--content',
+      'Task',
+      '--deadline',
+      '2026-06-15',
+    ])
+
+    expect(mockApi.addTask).toHaveBeenCalledWith(
+      expect.objectContaining({ deadlineDate: '2026-06-15' })
+    )
+    expect(consoleSpy).toHaveBeenCalledWith('Deadline: 2026-06-15')
+    consoleSpy.mockRestore()
+  })
+
+  it('creates task with both due and deadline', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.addTask.mockResolvedValue({
+      id: 'task-new',
+      content: 'Task',
+      due: { date: '2026-06-10', string: 'Jun 10' },
+      deadline: { date: '2026-06-15', lang: 'en' },
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'task',
+      'add',
+      '--content',
+      'Task',
+      '--due',
+      'Jun 10',
+      '--deadline',
+      '2026-06-15',
+    ])
+
+    expect(mockApi.addTask).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dueString: 'Jun 10',
+        deadlineDate: '2026-06-15',
+      })
+    )
+    expect(consoleSpy).toHaveBeenCalledWith('Due: Jun 10')
+    expect(consoleSpy).toHaveBeenCalledWith('Deadline: 2026-06-15')
+    consoleSpy.mockRestore()
+  })
+})
+
+describe('task update --deadline', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+  })
+
+  it('updates task with deadline', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getTask.mockResolvedValue({ id: 'task-1', content: 'Task' })
+    mockApi.updateTask.mockResolvedValue({ id: 'task-1', content: 'Task' })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'task',
+      'update',
+      'id:task-1',
+      '--deadline',
+      '2026-12-31',
+    ])
+
+    expect(mockApi.updateTask).toHaveBeenCalledWith('task-1', {
+      deadlineDate: '2026-12-31',
+    })
+    consoleSpy.mockRestore()
+  })
+
+  it('removes deadline with --no-deadline', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getTask.mockResolvedValue({
+      id: 'task-1',
+      content: 'Task',
+      deadline: { date: '2026-12-31', lang: 'en' },
+    })
+    mockApi.updateTask.mockResolvedValue({ id: 'task-1', content: 'Task' })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'task',
+      'update',
+      'id:task-1',
+      '--no-deadline',
+    ])
+
+    expect(mockApi.updateTask).toHaveBeenCalledWith('task-1', {
+      deadlineDate: null,
+    })
+    consoleSpy.mockRestore()
+  })
+})
