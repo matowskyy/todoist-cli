@@ -15,6 +15,7 @@ export function createMockApi(overrides: Partial<TodoistApi> = {}): TodoistApi {
     // Projects
     getProjects: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     getProject: vi.fn(),
+    deleteProject: vi.fn(),
     // Sections
     getSections: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     getSection: vi.fn(),

@@ -16,6 +16,7 @@ function createMockApi() {
     getProject: vi.fn(),
     getSections: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     getSection: vi.fn(),
+    getTasks: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     addSection: vi.fn(),
     deleteSection: vi.fn(),
   }
@@ -195,6 +196,7 @@ describe('section delete', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     mockApi.getSection.mockResolvedValue({ id: 'sec-1', name: 'My Section' })
+    mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
 
     await program.parseAsync(['node', 'td', 'section', 'delete', 'id:sec-1'])
 
@@ -209,6 +211,7 @@ describe('section delete', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     mockApi.getSection.mockResolvedValue({ id: 'sec-123', name: 'My Section' })
+    mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
     mockApi.deleteSection.mockResolvedValue(undefined)
 
     await program.parseAsync([
@@ -223,5 +226,26 @@ describe('section delete', () => {
     expect(mockApi.deleteSection).toHaveBeenCalledWith('sec-123')
     expect(consoleSpy).toHaveBeenCalledWith('Deleted section: My Section')
     consoleSpy.mockRestore()
+  })
+
+  it('fails when section has uncompleted tasks', async () => {
+    const program = createProgram()
+
+    mockApi.getSection.mockResolvedValue({ id: 'sec-1', name: 'My Section' })
+    mockApi.getTasks.mockResolvedValue({
+      results: [{ id: 't1' }, { id: 't2' }, { id: 't3' }],
+      nextCursor: null,
+    })
+
+    await expect(
+      program.parseAsync([
+        'node',
+        'td',
+        'section',
+        'delete',
+        'id:sec-1',
+        '--yes',
+      ])
+    ).rejects.toThrow('3 uncompleted tasks remain')
   })
 })

@@ -97,6 +97,16 @@ async function deleteSection(
   const id = requireIdRef(sectionId, 'section')
   const section = await api.getSection(id)
 
+  const { results: tasks } = await api.getTasks({ sectionId: id })
+  if (tasks.length > 0) {
+    throw new Error(
+      formatError(
+        'HAS_TASKS',
+        `Cannot delete section: ${tasks.length} uncompleted task${tasks.length === 1 ? '' : 's'} remain.`
+      )
+    )
+  }
+
   if (!options.yes) {
     console.log(`Would delete section: ${section.name}`)
     console.log('Use --yes to confirm.')

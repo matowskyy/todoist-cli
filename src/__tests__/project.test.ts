@@ -24,6 +24,7 @@ function createMockApi() {
     getProjects: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     getProject: vi.fn(),
     getTasks: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
+    deleteProject: vi.fn(),
   }
 }
 
@@ -547,5 +548,114 @@ describe('project collaborators', () => {
         'id:proj-1',
       ])
     ).rejects.toThrow('not shared')
+  })
+})
+
+describe('project delete', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+  })
+
+  it('shows dry-run without --yes', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Test Project' }],
+      nextCursor: null,
+    })
+    mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'delete',
+      'Test Project',
+    ])
+
+    expect(mockApi.deleteProject).not.toHaveBeenCalled()
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Would delete project: Test Project'
+    )
+    expect(consoleSpy).toHaveBeenCalledWith('Use --yes to confirm.')
+    consoleSpy.mockRestore()
+  })
+
+  it('deletes project with --yes when no tasks', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Test Project' }],
+      nextCursor: null,
+    })
+    mockApi.getTasks.mockResolvedValue({ results: [], nextCursor: null })
+    mockApi.deleteProject.mockResolvedValue(undefined)
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'delete',
+      'Test Project',
+      '--yes',
+    ])
+
+    expect(mockApi.deleteProject).toHaveBeenCalledWith('proj-1')
+    expect(consoleSpy).toHaveBeenCalledWith('Deleted project: Test Project')
+    consoleSpy.mockRestore()
+  })
+
+  it('fails when project has uncompleted tasks', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Test Project' }],
+      nextCursor: null,
+    })
+    mockApi.getTasks.mockResolvedValue({
+      results: [{ id: 't1' }, { id: 't2' }],
+      nextCursor: null,
+    })
+
+    await expect(
+      program.parseAsync([
+        'node',
+        'td',
+        'project',
+        'delete',
+        'Test Project',
+        '--yes',
+      ])
+    ).rejects.toThrow('2 uncompleted tasks remain')
+  })
+
+  it('shows singular "task" for single uncompleted task', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Test Project' }],
+      nextCursor: null,
+    })
+    mockApi.getTasks.mockResolvedValue({
+      results: [{ id: 't1' }],
+      nextCursor: null,
+    })
+
+    await expect(
+      program.parseAsync([
+        'node',
+        'td',
+        'project',
+        'delete',
+        'Test Project',
+        '--yes',
+      ])
+    ).rejects.toThrow('1 uncompleted task remain')
   })
 })
