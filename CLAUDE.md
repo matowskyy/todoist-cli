@@ -10,8 +10,17 @@ npm run dev         # watch mode
 npm run type-check  # type check
 npm run format      # format code
 npm test            # run tests
-node dist/index.js # or just `td` if linked
 ```
+
+**Run the CLI directly** (no linking needed):
+
+```bash
+node dist/index.js --help          # show commands
+node dist/index.js today           # run 'today' command
+node dist/index.js <command> ...   # run any command
+```
+
+Use this to verify changes work before committing.
 
 ## Architecture
 
