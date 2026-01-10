@@ -126,6 +126,63 @@ async function deleteLabel(
   console.log(`Deleted: @${labelName}`)
 }
 
+interface UpdateLabelOptions {
+  name?: string
+  color?: string
+  favorite?: boolean
+}
+
+async function updateLabel(
+  nameOrId: string,
+  options: UpdateLabelOptions
+): Promise<void> {
+  const api = await getApi()
+  const { results: labels } = await api.getLabels()
+
+  let labelId: string
+  let labelName: string
+
+  if (isIdRef(nameOrId)) {
+    labelId = extractId(nameOrId)
+    const label = labels.find((l) => l.id === labelId)
+    if (!label) {
+      throw new Error(formatError('LABEL_NOT_FOUND', 'Label not found.'))
+    }
+    labelName = label.name
+  } else {
+    const name = nameOrId.startsWith('@') ? nameOrId.slice(1) : nameOrId
+    const label = labels.find(
+      (l) => l.name.toLowerCase() === name.toLowerCase()
+    )
+    if (!label) {
+      throw new Error(
+        formatError('LABEL_NOT_FOUND', `Label "${nameOrId}" not found.`)
+      )
+    }
+    labelId = label.id
+    labelName = label.name
+  }
+
+  const args: {
+    name?: string
+    color?: string
+    isFavorite?: boolean
+  } = {}
+  if (options.name) args.name = options.name
+  if (options.color) args.color = options.color
+  if (options.favorite === true) args.isFavorite = true
+  if (options.favorite === false) args.isFavorite = false
+
+  if (Object.keys(args).length === 0) {
+    throw new Error(formatError('NO_CHANGES', 'No changes specified.'))
+  }
+
+  const updated = await api.updateLabel(labelId, args)
+  console.log(
+    `Updated: @${labelName}${options.name ? ` → @${updated.name}` : ''}`
+  )
+}
+
 export function registerLabelCommand(program: Command): void {
   const label = program.command('label').description('Manage labels')
 
@@ -152,4 +209,13 @@ export function registerLabelCommand(program: Command): void {
     .description('Delete a label')
     .option('--yes', 'Confirm deletion')
     .action(deleteLabel)
+
+  label
+    .command('update <ref>')
+    .description('Update a label')
+    .option('--name <name>', 'New name')
+    .option('--color <color>', 'New color')
+    .option('--favorite', 'Mark as favorite')
+    .option('--no-favorite', 'Remove from favorites')
+    .action(updateLabel)
 }

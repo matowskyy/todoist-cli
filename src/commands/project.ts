@@ -1,4 +1,5 @@
 import { Command } from 'commander'
+import type { ProjectViewStyle } from '@doist/todoist-api-typescript'
 import {
   getApi,
   fetchWorkspaces,
@@ -265,6 +266,92 @@ async function listCollaborators(ref: string): Promise<void> {
   }
 }
 
+interface CreateOptions {
+  name: string
+  color?: string
+  favorite?: boolean
+  parent?: string
+  viewStyle?: string
+}
+
+async function createProject(options: CreateOptions): Promise<void> {
+  const api = await getApi()
+
+  let parentId: string | undefined
+  if (options.parent) {
+    const parentProject = await resolveProjectRef(api, options.parent)
+    if (isWorkspaceProject(parentProject)) {
+      throw new Error(
+        formatError(
+          'WORKSPACE_NO_SUBPROJECTS',
+          'Workspace projects do not support sub-projects.',
+          ['Sub-projects are only supported for personal projects.']
+        )
+      )
+    }
+    parentId = parentProject.id
+  }
+
+  const project = await api.addProject({
+    name: options.name,
+    color: options.color,
+    isFavorite: options.favorite,
+    parentId,
+    viewStyle: options.viewStyle as ProjectViewStyle,
+  })
+
+  console.log(`Created: ${project.name}`)
+  console.log(chalk.dim(`ID: ${project.id}`))
+}
+
+interface UpdateOptions {
+  name?: string
+  color?: string
+  favorite?: boolean
+  viewStyle?: string
+}
+
+async function updateProject(
+  ref: string,
+  options: UpdateOptions
+): Promise<void> {
+  const api = await getApi()
+  const project = await resolveProjectRef(api, ref)
+
+  const args: {
+    name?: string
+    color?: string
+    isFavorite?: boolean
+    viewStyle?: ProjectViewStyle
+  } = {}
+  if (options.name) args.name = options.name
+  if (options.color) args.color = options.color
+  if (options.favorite === true) args.isFavorite = true
+  if (options.favorite === false) args.isFavorite = false
+  if (options.viewStyle) args.viewStyle = options.viewStyle as ProjectViewStyle
+
+  if (Object.keys(args).length === 0) {
+    throw new Error(formatError('NO_CHANGES', 'No changes specified.'))
+  }
+
+  const updated = await api.updateProject(project.id, args)
+  console.log(`Updated: ${updated.name}`)
+}
+
+async function archiveProject(ref: string): Promise<void> {
+  const api = await getApi()
+  const project = await resolveProjectRef(api, ref)
+  await api.archiveProject(project.id)
+  console.log(`Archived: ${project.name}`)
+}
+
+async function unarchiveProject(ref: string): Promise<void> {
+  const api = await getApi()
+  const project = await resolveProjectRef(api, ref)
+  await api.unarchiveProject(project.id)
+  console.log(`Unarchived: ${project.name}`)
+}
+
 export function registerProjectCommand(program: Command): void {
   const project = program.command('project').description('Manage projects')
 
@@ -295,4 +382,34 @@ export function registerProjectCommand(program: Command): void {
     .description('Delete a project (must have no uncompleted tasks)')
     .option('--yes', 'Confirm deletion')
     .action(deleteProject)
+
+  project
+    .command('create')
+    .description('Create a project')
+    .requiredOption('--name <name>', 'Project name')
+    .option('--color <color>', 'Project color')
+    .option('--favorite', 'Mark as favorite')
+    .option('--parent <ref>', 'Parent project (name or id:xxx)')
+    .option('--view-style <style>', 'View style (list or board)')
+    .action(createProject)
+
+  project
+    .command('update <ref>')
+    .description('Update a project')
+    .option('--name <name>', 'New name')
+    .option('--color <color>', 'New color')
+    .option('--favorite', 'Mark as favorite')
+    .option('--no-favorite', 'Remove from favorites')
+    .option('--view-style <style>', 'View style (list or board)')
+    .action(updateProject)
+
+  project
+    .command('archive <ref>')
+    .description('Archive a project')
+    .action(archiveProject)
+
+  project
+    .command('unarchive <ref>')
+    .description('Unarchive a project')
+    .action(unarchiveProject)
 }

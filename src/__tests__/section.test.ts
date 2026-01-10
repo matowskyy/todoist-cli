@@ -19,6 +19,7 @@ function createMockApi() {
     getTasks: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     addSection: vi.fn(),
     deleteSection: vi.fn(),
+    updateSection: vi.fn(),
   }
 }
 
@@ -247,5 +248,55 @@ describe('section delete', () => {
         '--yes',
       ])
     ).rejects.toThrow('3 uncompleted tasks remain')
+  })
+})
+
+describe('section update', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+  })
+
+  it('requires id: prefix', async () => {
+    const program = createProgram()
+
+    await expect(
+      program.parseAsync([
+        'node',
+        'td',
+        'section',
+        'update',
+        'Planning',
+        '--name',
+        'New Name',
+      ])
+    ).rejects.toThrow('INVALID_REF')
+  })
+
+  it('updates section name', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getSection.mockResolvedValue({ id: 'sec-1', name: 'Old Name' })
+    mockApi.updateSection.mockResolvedValue({ id: 'sec-1', name: 'New Name' })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'section',
+      'update',
+      'id:sec-1',
+      '--name',
+      'New Name',
+    ])
+
+    expect(mockApi.updateSection).toHaveBeenCalledWith('sec-1', {
+      name: 'New Name',
+    })
+    expect(consoleSpy).toHaveBeenCalledWith('Updated: Old Name → New Name')
+    consoleSpy.mockRestore()
   })
 })

@@ -25,6 +25,10 @@ function createMockApi() {
     getProject: vi.fn(),
     getTasks: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     deleteProject: vi.fn(),
+    addProject: vi.fn(),
+    updateProject: vi.fn(),
+    archiveProject: vi.fn(),
+    unarchiveProject: vi.fn(),
   }
 }
 
@@ -657,5 +661,387 @@ describe('project delete', () => {
         '--yes',
       ])
     ).rejects.toThrow('1 uncompleted task remain')
+  })
+})
+
+describe('project create', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+  let consoleSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    consoleSpy.mockRestore()
+  })
+
+  it('creates project with name', async () => {
+    const program = createProgram()
+
+    mockApi.addProject.mockResolvedValue({
+      id: 'proj-new',
+      name: 'New Project',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'create',
+      '--name',
+      'New Project',
+    ])
+
+    expect(mockApi.addProject).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'New Project' })
+    )
+    expect(consoleSpy).toHaveBeenCalledWith('Created: New Project')
+  })
+
+  it('creates project with --color and --favorite', async () => {
+    const program = createProgram()
+
+    mockApi.addProject.mockResolvedValue({
+      id: 'proj-new',
+      name: 'Colored Project',
+      color: 'blue',
+      isFavorite: true,
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'create',
+      '--name',
+      'Colored Project',
+      '--color',
+      'blue',
+      '--favorite',
+    ])
+
+    expect(mockApi.addProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Colored Project',
+        color: 'blue',
+        isFavorite: true,
+      })
+    )
+  })
+
+  it('creates sub-project with --parent for personal project', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'parent-1', name: 'Parent Project' }],
+      nextCursor: null,
+    })
+    mockApi.addProject.mockResolvedValue({
+      id: 'proj-new',
+      name: 'Sub Project',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'create',
+      '--name',
+      'Sub Project',
+      '--parent',
+      'Parent Project',
+    ])
+
+    expect(mockApi.addProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Sub Project',
+        parentId: 'parent-1',
+      })
+    )
+  })
+
+  it('rejects --parent for workspace project', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [
+        { id: 'ws-proj-1', name: 'Workspace Project', workspaceId: 'ws-1' },
+      ],
+      nextCursor: null,
+    })
+
+    await expect(
+      program.parseAsync([
+        'node',
+        'td',
+        'project',
+        'create',
+        '--name',
+        'Sub Project',
+        '--parent',
+        'Workspace Project',
+      ])
+    ).rejects.toThrow('WORKSPACE_NO_SUBPROJECTS')
+  })
+
+  it('shows project ID after creation', async () => {
+    const program = createProgram()
+
+    mockApi.addProject.mockResolvedValue({ id: 'proj-xyz', name: 'Test' })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'create',
+      '--name',
+      'Test',
+    ])
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('proj-xyz'))
+  })
+})
+
+describe('project update', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+  let consoleSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    consoleSpy.mockRestore()
+  })
+
+  it('updates project name', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'Old Name' }],
+      nextCursor: null,
+    })
+    mockApi.updateProject.mockResolvedValue({ id: 'proj-1', name: 'New Name' })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'update',
+      'Old Name',
+      '--name',
+      'New Name',
+    ])
+
+    expect(mockApi.updateProject).toHaveBeenCalledWith('proj-1', {
+      name: 'New Name',
+    })
+    expect(consoleSpy).toHaveBeenCalledWith('Updated: New Name')
+  })
+
+  it('updates project color and favorite', async () => {
+    const program = createProgram()
+
+    mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'My Project' })
+    mockApi.updateProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+      color: 'red',
+      isFavorite: true,
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'update',
+      'id:proj-1',
+      '--color',
+      'red',
+      '--favorite',
+    ])
+
+    expect(mockApi.updateProject).toHaveBeenCalledWith('proj-1', {
+      color: 'red',
+      isFavorite: true,
+    })
+  })
+
+  it('removes favorite with --no-favorite', async () => {
+    const program = createProgram()
+
+    mockApi.getProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+      isFavorite: true,
+    })
+    mockApi.updateProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+      isFavorite: false,
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'update',
+      'id:proj-1',
+      '--no-favorite',
+    ])
+
+    expect(mockApi.updateProject).toHaveBeenCalledWith('proj-1', {
+      isFavorite: false,
+    })
+  })
+
+  it('updates view-style', async () => {
+    const program = createProgram()
+
+    mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'My Project' })
+    mockApi.updateProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+      viewStyle: 'board',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'update',
+      'id:proj-1',
+      '--view-style',
+      'board',
+    ])
+
+    expect(mockApi.updateProject).toHaveBeenCalledWith('proj-1', {
+      viewStyle: 'board',
+    })
+  })
+
+  it('throws when no changes specified', async () => {
+    const program = createProgram()
+
+    mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'My Project' })
+
+    await expect(
+      program.parseAsync(['node', 'td', 'project', 'update', 'id:proj-1'])
+    ).rejects.toThrow('NO_CHANGES')
+  })
+})
+
+describe('project archive', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+  let consoleSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    consoleSpy.mockRestore()
+  })
+
+  it('archives project by name', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'My Project' }],
+      nextCursor: null,
+    })
+    mockApi.archiveProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+    })
+
+    await program.parseAsync(['node', 'td', 'project', 'archive', 'My Project'])
+
+    expect(mockApi.archiveProject).toHaveBeenCalledWith('proj-1')
+    expect(consoleSpy).toHaveBeenCalledWith('Archived: My Project')
+  })
+
+  it('archives project by id: prefix', async () => {
+    const program = createProgram()
+
+    mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'My Project' })
+    mockApi.archiveProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+    })
+
+    await program.parseAsync(['node', 'td', 'project', 'archive', 'id:proj-1'])
+
+    expect(mockApi.archiveProject).toHaveBeenCalledWith('proj-1')
+  })
+})
+
+describe('project unarchive', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+  let consoleSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    consoleSpy.mockRestore()
+  })
+
+  it('unarchives project by name', async () => {
+    const program = createProgram()
+
+    mockApi.getProjects.mockResolvedValue({
+      results: [{ id: 'proj-1', name: 'My Project' }],
+      nextCursor: null,
+    })
+    mockApi.unarchiveProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'unarchive',
+      'My Project',
+    ])
+
+    expect(mockApi.unarchiveProject).toHaveBeenCalledWith('proj-1')
+    expect(consoleSpy).toHaveBeenCalledWith('Unarchived: My Project')
+  })
+
+  it('unarchives project by id: prefix', async () => {
+    const program = createProgram()
+
+    mockApi.getProject.mockResolvedValue({ id: 'proj-1', name: 'My Project' })
+    mockApi.unarchiveProject.mockResolvedValue({
+      id: 'proj-1',
+      name: 'My Project',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'project',
+      'unarchive',
+      'id:proj-1',
+    ])
+
+    expect(mockApi.unarchiveProject).toHaveBeenCalledWith('proj-1')
   })
 })

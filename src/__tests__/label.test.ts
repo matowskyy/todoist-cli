@@ -15,6 +15,7 @@ function createMockApi() {
     getLabels: vi.fn().mockResolvedValue({ results: [], nextCursor: null }),
     addLabel: vi.fn(),
     deleteLabel: vi.fn(),
+    updateLabel: vi.fn(),
   }
 }
 
@@ -318,6 +319,196 @@ describe('label delete', () => {
         'delete',
         'nonexistent',
         '--yes',
+      ])
+    ).rejects.toThrow('LABEL_NOT_FOUND')
+  })
+})
+
+describe('label update', () => {
+  let mockApi: ReturnType<typeof createMockApi>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockApi = createMockApi()
+    mockGetApi.mockResolvedValue(mockApi as any)
+  })
+
+  it('updates label name', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getLabels.mockResolvedValue({
+      results: [{ id: 'label-1', name: 'old-name' }],
+      nextCursor: null,
+    })
+    mockApi.updateLabel.mockResolvedValue({ id: 'label-1', name: 'new-name' })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'update',
+      'old-name',
+      '--name',
+      'new-name',
+    ])
+
+    expect(mockApi.updateLabel).toHaveBeenCalledWith('label-1', {
+      name: 'new-name',
+    })
+    expect(consoleSpy).toHaveBeenCalledWith('Updated: @old-name → @new-name')
+    consoleSpy.mockRestore()
+  })
+
+  it('updates label color and favorite', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getLabels.mockResolvedValue({
+      results: [{ id: 'label-1', name: 'work' }],
+      nextCursor: null,
+    })
+    mockApi.updateLabel.mockResolvedValue({
+      id: 'label-1',
+      name: 'work',
+      color: 'red',
+      isFavorite: true,
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'update',
+      'work',
+      '--color',
+      'red',
+      '--favorite',
+    ])
+
+    expect(mockApi.updateLabel).toHaveBeenCalledWith('label-1', {
+      color: 'red',
+      isFavorite: true,
+    })
+    consoleSpy.mockRestore()
+  })
+
+  it('removes favorite with --no-favorite', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getLabels.mockResolvedValue({
+      results: [{ id: 'label-1', name: 'work', isFavorite: true }],
+      nextCursor: null,
+    })
+    mockApi.updateLabel.mockResolvedValue({
+      id: 'label-1',
+      name: 'work',
+      isFavorite: false,
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'update',
+      'work',
+      '--no-favorite',
+    ])
+
+    expect(mockApi.updateLabel).toHaveBeenCalledWith('label-1', {
+      isFavorite: false,
+    })
+    consoleSpy.mockRestore()
+  })
+
+  it('updates by id: prefix', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getLabels.mockResolvedValue({
+      results: [{ id: 'label-123', name: 'existing' }],
+      nextCursor: null,
+    })
+    mockApi.updateLabel.mockResolvedValue({
+      id: 'label-123',
+      name: 'existing',
+      color: 'blue',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'update',
+      'id:label-123',
+      '--color',
+      'blue',
+    ])
+
+    expect(mockApi.updateLabel).toHaveBeenCalledWith('label-123', {
+      color: 'blue',
+    })
+    consoleSpy.mockRestore()
+  })
+
+  it('handles @-prefixed name', async () => {
+    const program = createProgram()
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    mockApi.getLabels.mockResolvedValue({
+      results: [{ id: 'label-1', name: 'home' }],
+      nextCursor: null,
+    })
+    mockApi.updateLabel.mockResolvedValue({
+      id: 'label-1',
+      name: 'home',
+      color: 'green',
+    })
+
+    await program.parseAsync([
+      'node',
+      'td',
+      'label',
+      'update',
+      '@home',
+      '--color',
+      'green',
+    ])
+
+    expect(mockApi.updateLabel).toHaveBeenCalledWith('label-1', {
+      color: 'green',
+    })
+    consoleSpy.mockRestore()
+  })
+
+  it('throws when no changes specified', async () => {
+    const program = createProgram()
+
+    mockApi.getLabels.mockResolvedValue({
+      results: [{ id: 'label-1', name: 'work' }],
+      nextCursor: null,
+    })
+
+    await expect(
+      program.parseAsync(['node', 'td', 'label', 'update', 'work'])
+    ).rejects.toThrow('NO_CHANGES')
+  })
+
+  it('throws for non-existent label', async () => {
+    const program = createProgram()
+
+    mockApi.getLabels.mockResolvedValue({ results: [], nextCursor: null })
+
+    await expect(
+      program.parseAsync([
+        'node',
+        'td',
+        'label',
+        'update',
+        'nonexistent',
+        '--name',
+        'new-name',
       ])
     ).rejects.toThrow('LABEL_NOT_FOUND')
   })

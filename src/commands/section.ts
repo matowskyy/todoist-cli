@@ -117,6 +117,18 @@ async function deleteSection(
   console.log(`Deleted section: ${section.name}`)
 }
 
+async function updateSection(
+  sectionId: string,
+  options: { name: string }
+): Promise<void> {
+  const api = await getApi()
+  const id = requireIdRef(sectionId, 'section')
+  const section = await api.getSection(id)
+
+  const updated = await api.updateSection(id, { name: options.name })
+  console.log(`Updated: ${section.name} → ${updated.name}`)
+}
+
 export function registerSectionCommand(program: Command): void {
   const section = program
     .command('section')
@@ -144,4 +156,10 @@ export function registerSectionCommand(program: Command): void {
     .description('Delete a section')
     .option('--yes', 'Confirm deletion')
     .action(deleteSection)
+
+  section
+    .command('update <id>')
+    .description('Update a section')
+    .requiredOption('--name <name>', 'New section name')
+    .action(updateSection)
 }
