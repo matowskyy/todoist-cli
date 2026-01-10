@@ -22,8 +22,16 @@ export function formatPriority(priority: number): string {
   return colorFn(label)
 }
 
+export function formatDueDate(dateStr: string): string {
+  const date = new Date(dateStr + 'T00:00:00')
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 export function formatDue(due: Task['due'] | undefined): string {
   if (!due) return ''
+  if (due.isRecurring) {
+    return `${formatDueDate(due.date)} (${due.string})`
+  }
   return due.string || due.date
 }
 
