@@ -29,6 +29,10 @@ export function createMockApi(overrides: Partial<TodoistApi> = {}): TodoistApi {
     deleteComment: vi.fn(),
     // User
     getUser: vi.fn(),
+    // Activity
+    getActivityLogs: vi
+      .fn()
+      .mockResolvedValue({ results: [], nextCursor: null }),
     ...overrides,
   } as unknown as TodoistApi
 }

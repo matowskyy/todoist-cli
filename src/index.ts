@@ -12,6 +12,7 @@ import { registerLabelCommand } from './commands/label.js'
 import { registerCommentCommand } from './commands/comment.js'
 import { registerSectionCommand } from './commands/section.js'
 import { registerWorkspaceCommand } from './commands/workspace.js'
+import { registerActivityCommand } from './commands/activity.js'
 
 program
   .name('td')
@@ -36,5 +37,6 @@ registerLabelCommand(program)
 registerCommentCommand(program)
 registerSectionCommand(program)
 registerWorkspaceCommand(program)
+registerActivityCommand(program)
 
 program.parse()
