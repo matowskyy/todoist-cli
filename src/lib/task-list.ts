@@ -75,6 +75,7 @@ export interface TaskListOptions {
   json?: boolean
   ndjson?: boolean
   full?: boolean
+  raw?: boolean
 }
 
 export function parsePriority(p: string): number {
@@ -100,7 +101,8 @@ function formatGroupedTaskList(
   project: Project,
   sections: Section[],
   projects: Map<string, Project>,
-  collaboratorCache: CollaboratorCache
+  collaboratorCache: CollaboratorCache,
+  raw = false
 ): string {
   if (tasks.length === 0) {
     return 'No tasks found.'
@@ -130,7 +132,7 @@ function formatGroupedTaskList(
         projects,
         collaboratorCache
       )
-      lines.push(formatTaskRow(task, undefined, assignee ?? undefined))
+      lines.push(formatTaskRow(task, undefined, assignee ?? undefined, raw))
       lines.push('')
     }
   }
@@ -146,7 +148,7 @@ function formatGroupedTaskList(
           projects,
           collaboratorCache
         )
-        lines.push(formatTaskRow(task, undefined, assignee ?? undefined))
+        lines.push(formatTaskRow(task, undefined, assignee ?? undefined, raw))
         lines.push('')
       }
     }
@@ -158,7 +160,8 @@ function formatGroupedTaskList(
 function formatFlatTaskList(
   tasks: Task[],
   projects: Map<string, Project>,
-  collaboratorCache: CollaboratorCache
+  collaboratorCache: CollaboratorCache,
+  raw = false
 ): string {
   if (tasks.length === 0) {
     return 'No tasks found.'
@@ -172,7 +175,7 @@ function formatFlatTaskList(
       projects,
       collaboratorCache
     )
-    return formatTaskRow(task, projectName, assignee ?? undefined)
+    return formatTaskRow(task, projectName, assignee ?? undefined, raw)
   })
 
   return blocks.join('\n\n')
@@ -311,11 +314,14 @@ export async function listTasksForProject(
         projectRes,
         sectionsRes.results,
         projects,
-        collaboratorCache
+        collaboratorCache,
+        options.raw
       )
     )
   } else {
-    console.log(formatFlatTaskList(filtered, projects, collaboratorCache))
+    console.log(
+      formatFlatTaskList(filtered, projects, collaboratorCache, options.raw)
+    )
   }
   console.log(formatNextCursorFooter(nextCursor))
 }

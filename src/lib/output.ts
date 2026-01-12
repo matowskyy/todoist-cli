@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import type { Task } from '@doist/todoist-api-typescript'
 import type { Project } from './api.js'
 import { formatDuration } from './duration.js'
+import { renderMarkdown } from './markdown.js'
 
 const PRIORITY_COLORS: Record<number, (s: string) => string> = {
   4: chalk.red, // p1 = priority 4 in API (highest)
@@ -39,9 +40,11 @@ export function formatDue(due: Task['due'] | undefined): string {
 export function formatTaskRow(
   task: Task,
   projectName?: string,
-  assignee?: string
+  assignee?: string,
+  raw = false
 ): string {
-  const line1 = '  ' + task.content
+  const content = raw ? task.content : renderMarkdown(task.content)
+  const line1 = '  ' + content
   const metaParts = [chalk.dim(`id:${task.id}`), formatPriority(task.priority)]
   const due = formatDue(task.due)
   if (due) metaParts.push(chalk.green(due))
@@ -60,11 +63,13 @@ export function formatTaskRow(
 export function formatTaskView(
   task: Task,
   project?: Project,
-  full = false
+  full = false,
+  raw = false
 ): string {
   const lines: string[] = []
+  const content = raw ? task.content : renderMarkdown(task.content)
 
-  lines.push(`${chalk.bold(task.content)}`)
+  lines.push(content)
   lines.push('')
   lines.push(`ID:       ${task.id}`)
   if (task.isUncompletable) {
@@ -94,7 +99,8 @@ export function formatTaskView(
   if (task.description) {
     lines.push('')
     lines.push('Description:')
-    lines.push(task.description)
+    const desc = raw ? task.description : renderMarkdown(task.description)
+    lines.push(desc)
   }
 
   if (full) {

@@ -22,6 +22,7 @@ interface TodayOptions {
   json?: boolean
   ndjson?: boolean
   full?: boolean
+  raw?: boolean
 }
 
 export function registerTodayCommand(program: Command): void {
@@ -40,6 +41,7 @@ export function registerTodayCommand(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('--ndjson', 'Output as newline-delimited JSON')
     .option('--full', 'Include all fields in JSON output')
+    .option('--raw', 'Disable markdown rendering')
     .action(async (options: TodayOptions) => {
       const api = await getApi()
 
@@ -121,7 +123,8 @@ export function registerTodayCommand(program: Command): void {
             formatTaskRow(
               task,
               projects.get(task.projectId)?.name,
-              assignee ?? undefined
+              assignee ?? undefined,
+              options.raw
             )
           )
           console.log('')
@@ -140,7 +143,8 @@ export function registerTodayCommand(program: Command): void {
           formatTaskRow(
             task,
             projects.get(task.projectId)?.name,
-            assignee ?? undefined
+            assignee ?? undefined,
+            options.raw
           )
         )
         console.log('')

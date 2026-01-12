@@ -8,6 +8,7 @@ import {
 } from '../lib/output.js'
 import { paginate, LIMITS } from '../lib/pagination.js'
 import { requireIdRef, resolveTaskRef, resolveProjectRef } from '../lib/refs.js'
+import { renderMarkdown } from '../lib/markdown.js'
 import chalk from 'chalk'
 
 interface ListOptions {
@@ -18,6 +19,7 @@ interface ListOptions {
   full?: boolean
   lines?: string
   project?: boolean
+  raw?: boolean
 }
 
 function truncateContent(content: string, maxLines: number): string {
@@ -91,7 +93,10 @@ async function listComments(ref: string, options: ListOptions): Promise<void> {
     console.log(
       `${id}  ${date}${hasAttachment ? '  ' + chalk.blue('[file]') : ''}`
     )
-    const truncated = truncateContent(comment.content, maxLines)
+    const content = options.raw
+      ? comment.content
+      : renderMarkdown(comment.content)
+    const truncated = truncateContent(content, maxLines)
     for (const line of truncated.split('\n')) {
       console.log(`  ${line}`)
     }
@@ -191,7 +196,14 @@ async function updateComment(
   console.log(`Updated comment: ${oldPreview}`)
 }
 
-async function viewComment(commentId: string): Promise<void> {
+interface ViewOptions {
+  raw?: boolean
+}
+
+async function viewComment(
+  commentId: string,
+  options: ViewOptions
+): Promise<void> {
   const api = await getApi()
   const id = requireIdRef(commentId, 'comment')
   const comment = await api.getComment(id)
@@ -202,7 +214,10 @@ async function viewComment(commentId: string): Promise<void> {
   console.log(`Posted:  ${comment.postedAt}`)
   console.log('')
   console.log('Content:')
-  console.log(comment.content)
+  const content = options.raw
+    ? comment.content
+    : renderMarkdown(comment.content)
+  console.log(content)
 
   if (comment.fileAttachment) {
     const att = comment.fileAttachment
@@ -228,6 +243,7 @@ export function registerCommentCommand(program: Command): void {
     .option('--ndjson', 'Output as newline-delimited JSON')
     .option('--full', 'Include all fields in JSON output')
     .option('--lines <n>', 'Number of content lines to show (default: 3)')
+    .option('--raw', 'Disable markdown rendering')
     .action(listComments)
 
   comment
@@ -253,5 +269,6 @@ export function registerCommentCommand(program: Command): void {
   comment
     .command('view <id>')
     .description('View a single comment with full details')
+    .option('--raw', 'Disable markdown rendering')
     .action(viewComment)
 }

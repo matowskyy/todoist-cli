@@ -47,6 +47,7 @@ interface ListOptions extends TaskListOptions {
 interface ViewOptions {
   full?: boolean
   json?: boolean
+  raw?: boolean
 }
 
 async function listTasks(options: ListOptions): Promise<void> {
@@ -79,7 +80,7 @@ async function viewTask(ref: string, options: ViewOptions): Promise<void> {
   const { results: projects } = await api.getProjects()
   const project = projects.find((p) => p.id === task.projectId)
 
-  console.log(formatTaskView(task, project, options.full))
+  console.log(formatTaskView(task, project, options.full, options.raw))
 }
 
 async function completeTask(ref: string): Promise<void> {
@@ -320,6 +321,7 @@ export function registerTaskCommand(program: Command): void {
     .option('--json', 'Output as JSON')
     .option('--ndjson', 'Output as newline-delimited JSON')
     .option('--full', 'Include all fields in JSON output')
+    .option('--raw', 'Disable markdown rendering')
     .action(listTasks)
 
   task
@@ -327,6 +329,7 @@ export function registerTaskCommand(program: Command): void {
     .description('View task details')
     .option('--json', 'Output as JSON')
     .option('--full', 'Include all fields in output')
+    .option('--raw', 'Disable markdown rendering')
     .action(viewTask)
 
   task
