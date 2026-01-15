@@ -4,19 +4,23 @@ A command-line interface for Todoist.
 
 ## Installation
 
-> **Note**: This package is not yet published to npm.
+> **Note**: This package is not yet published to npm. Once published, install with:
+>
+> ```bash
+> npm install -g @doist/todoist-cli
+> ```
+
+### Local Setup (for now)
 
 ```bash
-# Once published:
-npm install -g @doist/todoist-cli
-
-# For now, clone and link locally:
-git clone <repo-url>
+git clone https://github.com/Doist/todoist-cli.git
 cd todoist-cli
 npm install
 npm run build
 npm link
 ```
+
+This makes the `td` command available globally.
 
 ## Setup
 
